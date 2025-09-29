@@ -1,0 +1,18 @@
+{% load static %}
+<div class="accounts-links">
+    <a href="{% url 'login' %}" class="accounts-link" aria-label="Zaloguj">
+        <img src="{% static 'images/login.jpeg' %}" alt="login" title="LOGIN">
+    </a>
+    <a href="{% url 'register' %}" class="accounts-link" aria-label="Rejestracja">
+        <img src="{% static 'images/register.jpeg' %}" alt="register" title="REGISTER">
+    </a>
+    <a href="{% url 'logout' %}" class="accounts-link" aria-label="Wyloguj">
+        <img src="{% static 'images/logout.jpeg' %}" alt="logout" title="LOGOUT">
+    </a>
+    <a href="{% url 'user_account' %}" class="accounts-link" aria-label="Konto użytkownika">
+        <img src="{% static 'images/user.jpeg' %}" alt="user_account" {% if user.is_authenticated %}title="{{ user.username }}"{% else %}title="Niezalogowany"{% endif %}>
+    </a>
+     <a href="{% url 'password_reset' %}" class="accounts-link" aria-label="Reset hasła">
+        <img src="{% static 'images/reset.jpeg' %}" alt="Reset hasła" title="Reset hasła">
+    </a>
+</div>

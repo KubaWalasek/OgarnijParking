@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang='pl'>
+<head>
+    <meta charset="UTF-8">
+    <title>Ogarnij Parking</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/account_links.css' %}">
+    <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+    {% block links %}{% endblock %}
+
+</head>
+
+<body>
+{% include 'accounts_links.html' %}
+<!-- HTML -->
+
+
+{% block content %}{% endblock %}
+
+</body>
+</html>
