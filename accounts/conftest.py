@@ -1,6 +1,6 @@
 import pytest
 from django.contrib.auth.models import User
-from accounts.models import UserProfile
+from accounts.models import User
 
 
 
@@ -14,7 +14,7 @@ def user():
 
 @pytest.fixture
 def userprofile(user):
-    return UserProfile.objects.create(
+    return User.objects.create(
         user=user,
         first_name='testname',
         last_name='testlastname',

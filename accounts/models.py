@@ -1,17 +1,19 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from .managers import CustomUserManager
 
-# Create your models here.
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=20, blank=True, null=True)
-    last_name = models.CharField(max_length=20, blank=True, null=True)
-    post_code = models.CharField(max_length=10, blank=True, null=True)
-    city = models.CharField(max_length=30, blank=True, null=True)
-    street = models.CharField(max_length=30, blank=True, null=True)
-    street_number = models.CharField(max_length=10, blank=True, null=True)
-    door_number = models.CharField(max_length=10, blank=True, null=True)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
 
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(_('email address'), unique=True)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(default=timezone.now)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
     def __str__(self):
-        return self.user.username
+        return self.email
