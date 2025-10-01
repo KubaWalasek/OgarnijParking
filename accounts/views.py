@@ -4,8 +4,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.views import View
-from accounts.forms import CreateUserForm, UpdateUserForm
-
+from accounts.forms import CreateUserForm, UpdateUserForm, AdresForm
+from accounts.models import Adres
 
 
 ######################################################################################################
@@ -76,19 +76,31 @@ class LogoutView(View):
 ######################################################################################################
 class UserAccountView(LoginRequiredMixin, View):
     def get(self, request):
-        form = UpdateUserForm(instance=request.user)
+        user = request.user
+        form = UpdateUserForm(instance=user)
+        adres, created = Adres.objects.get_or_create(user=user)
+        adres_form = AdresForm(instance=adres)
         return render(request, 'account_form.html', {
             'form': form,
+            'adres_form': adres_form,
             'url': 'user_account'
         })
 
     def post(self, request):
-        form = UpdateUserForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            messages.success(request, 'Account changed successfully!')
+        user = request.user
+        adres, _ = Adres.objects.get_or_create(user=user)
+        form = UpdateUserForm(request.POST, instance=user)
+        adres_form = AdresForm(request.POST, instance=adres)
+        if form.is_valid() and adres_form.is_valid():
+            if not (form.has_changed() or adres_form.has_changed()):
+                messages.success(request, 'No data updated !')
+                return redirect('user_account')
+            form.save()
+            adres_form.save()
+            messages.success(request, 'Account updated successfully!')
             return redirect('user_account')
         return render(request, 'account_form.html', {
             'form': form,
+            'adres_form': adres_form,
             'url': 'user_account',
         })

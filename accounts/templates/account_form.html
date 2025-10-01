@@ -80,6 +80,49 @@
                             <div class="form-error">{{ error }}</div>
                         {% endfor %}
                     </div>
+                    <div class="form-row">
+                        {{ adres_form.post_code.label_tag }}
+                        {{ adres_form.post_code }}
+                        {% for error in adres_form.street.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-row">
+                        {{ adres_form.city.label_tag }}
+                        {{ adres_form.city }}
+                        {% for error in adres_form.street.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-row">
+                        {{ adres_form.street.label_tag }}
+                        {{ adres_form.street }}
+                        {% for error in adres_form.street.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-row">
+                        {{ adres_form.house_number.label_tag }}
+                        {{ adres_form.house_number }}
+                        {% for error in adres_form.street.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-row">
+                        {{ adres_form.apartment_number.label_tag }}
+                        {{ adres_form.apartment_number }}
+                        {% for error in adres_form.street.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-row">
+                        {{ adres_form.phone_number.label_tag }}
+                        {{ adres_form.phone_number }}
+                        {% for error in adres_form.street.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
                 {% endif %}
 
                 <button type="submit" class="big-form-btn">

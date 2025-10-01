@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model, forms
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 
+from accounts.models import Adres
+
 User = get_user_model()
 
 
@@ -39,11 +41,15 @@ class UpdateUserForm(forms.ModelForm):
 
         if password1:
             user.set_password(password1)
+
         if commit:
             user.save()
         return user
 
-
+class AdresForm(forms.ModelForm):
+    class Meta:
+        model = Adres
+        fields = ['post_code', 'city', 'street', 'house_number', 'apartment_number']
 
 
 
