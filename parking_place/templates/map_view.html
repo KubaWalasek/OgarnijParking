@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa miejsc parkingowych</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/account_links.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home_link.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 500px; width: 500px; margin: 20px 0; }
+        .city-select { margin: 20px 0; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+{% include 'home_link.html' %}
+{% include 'accounts_links.html' %}
+<h2>Wybierz miasto i zobacz mapę parkingową</h2>
+
+<select id="city-select" class="city-select">
+    <option value="warszawa">Warszawa</option>
+    <option value="krakow">Kraków</option>
+    <option value="wroclaw">Wrocław</option>
+    <option value="poznan">Poznań</option>
+    <option value="gdansk">Gdańsk</option>
+</select>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // Współrzędne miast
+    const cityCoords = {
+        warszawa: [52.2297, 21.0122],
+        krakow:   [50.0619, 19.9368],
+        wroclaw:  [51.1079, 17.0385],
+        poznan:   [52.4064, 16.9252],
+        gdansk:   [54.3520, 18.6466],
+    };
+
+    // Inicjalizacja mapy na Warszawie
+    let map = L.map('map').setView(cityCoords.warszawa, 12);
+
+    // Kafelki OSM
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+        maxZoom: 18,
+    }).addTo(map);
+
+    // Zmiana widoku po wyborze miasta
+    document.getElementById('city-select').addEventListener('change', function() {
+        const city = this.value;
+        const coords = cityCoords[city];
+        map.setView(coords, 12);
+    });
+</script>
+</body>
+</html>

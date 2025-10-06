@@ -63,6 +63,15 @@
                         {% endfor %}
                     </div>
                 {% elif url == 'register' or url == 'user_account' %}
+                    {% if url == 'user_account' %}
+                        <div class="form-row">
+                            {{ form.old_password.label_tag }}
+                            {{ form.old_password }}
+                            {% for error in form.old_password.errors %}
+                                <div class="form-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                     <div class="form-row">
                         {{ form.password1.label_tag }}
                         {{ form.password1 }}
@@ -136,6 +145,11 @@
                         WYŚLIJ
                     {% endif %}
                 </button>
+                <div>
+                {% if url == 'user_account' %}
+                    <a class="big-form-btn-link" href="{% url 'delete_account' %}" >USUŃ KONTO</a>
+                {% endif %}
+            </div>
             </form>
         </div>
     </div>

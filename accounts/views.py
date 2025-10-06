@@ -4,14 +4,14 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.views import View
-from accounts.forms import CreateUserForm, UpdateUserForm, AdresForm
+from accounts.forms import CreateUserForm, UpdateUserForm, AdresForm, DeleteUserForm
 from accounts.models import Adres
 
 
 ######################################################################################################
 
 def home(request):
-    return render(request, 'base.html')
+    return render(request, 'home_base.html')
 
 
 class RegisterView(View):
@@ -95,7 +95,9 @@ class UserAccountView(LoginRequiredMixin, View):
             if not (form.has_changed() or adres_form.has_changed()):
                 messages.success(request, 'No data updated !')
                 return redirect('user_account')
-            form.save()
+            user = form.save()
+            if form.cleaned_data.get('password1'):
+                update_session_auth_hash(request, user)
             adres_form.save()
             messages.success(request, 'Account updated successfully!')
             return redirect('user_account')
@@ -103,4 +105,22 @@ class UserAccountView(LoginRequiredMixin, View):
             'form': form,
             'adres_form': adres_form,
             'url': 'user_account',
+        })
+
+class DeleteAccountView(LoginRequiredMixin, View):
+    def get(self, request):
+        form = DeleteUserForm()
+        return render(request, 'delete_account.html', {
+            'form': form,
+        })
+
+    def post(self, request):
+        user = request.user
+        form = DeleteUserForm(request.POST, instance=user)
+        if form.is_valid():
+            request.user.delete()
+            messages.success(request, 'Account deleted successfully!')
+            return redirect('login')
+        return render(request, 'delete_account.html', {
+            'form': form,
         })
