@@ -1,10 +1,9 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.views import View
-from accounts.forms import CreateUserForm, UpdateUserForm, AdresForm, DeleteUserForm
+from accounts.forms import CreateUserForm, UpdateUserForm, AdresForm, DeleteUserForm, LoginForm, UpdatePasswordForm
 from accounts.models import Adres
 
 
@@ -25,7 +24,7 @@ class RegisterView(View):
     def post(self, request):
         form = CreateUserForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            form.save()
             messages.success(request, 'Account created successfully!')
             return redirect('user_account')
         return render(request, 'account_form.html', {
@@ -35,33 +34,36 @@ class RegisterView(View):
 
 ######################################################################################################
 class LoginView(View):
-    def get(self, request):
+    def _login_set(self, request):
         if request.user.is_authenticated:
             messages.info(request, 'You are already logged in!')
             return redirect('user_account')
-        form = AuthenticationForm()
-        return render(request, 'account_form.html', {
-            'form': form,
-            'url': 'login'
-        })
+
+        if request.method == 'GET':
+            form = LoginForm()
+            return render(request, 'account_form.html', {
+                'form': form,
+                'url': 'login'
+            })
+
+        if request.method == 'POST':
+            form = LoginForm(request, data=request.POST)
+            if form.is_valid():
+                user = form.get_user()
+                login(request, user)
+                messages.success(request, 'You are logged in!')
+                return redirect('user_account')
+            messages.error(request, 'Invalid username or password!')
+            return render(request, 'account_form.html', {
+                'form': form,
+                'url': 'login'
+            })
+
+    def get(self, request):
+        return self._login_set(request)
 
     def post(self, request):
-        if request.user.is_authenticated:
-            messages.info(request, 'You are already logged in!')
-            return redirect('user_account')
-
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            messages.success(request, 'You are logged in!')
-            return redirect('user_account')
-
-        messages.error(request, 'Invalid username or password!')
-        return render(request, 'account_form.html',{
-            'form': form,
-            'url': 'login'
-        })
+        return self._login_set(request)
 
 
 
@@ -92,12 +94,10 @@ class UserAccountView(LoginRequiredMixin, View):
         form = UpdateUserForm(request.POST, instance=user)
         adres_form = AdresForm(request.POST, instance=adres)
         if form.is_valid() and adres_form.is_valid():
-            if not (form.has_changed() or adres_form.has_changed()):
+            if not form.has_changed() and  not adres_form.has_changed():
                 messages.success(request, 'No data updated !')
                 return redirect('user_account')
-            user = form.save()
-            if form.cleaned_data.get('password1'):
-                update_session_auth_hash(request, user)
+            form.save()
             adres_form.save()
             messages.success(request, 'Account updated successfully!')
             return redirect('user_account')
@@ -107,16 +107,29 @@ class UserAccountView(LoginRequiredMixin, View):
             'url': 'user_account',
         })
 
+class UpdatePasswordView(LoginRequiredMixin, View):
+    def get(self, request):
+        form = UpdatePasswordForm(request.user)
+        return render(request, 'update_password.html', {'form': form})
+
+    def post(self, request):
+        form = UpdatePasswordForm(request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, request.user)
+            messages.success(request, 'Password updated successfully!')
+            return redirect('user_account')
+        return render(request, 'update_password.html', {'form': form})
+
 class DeleteAccountView(LoginRequiredMixin, View):
     def get(self, request):
-        form = DeleteUserForm()
+        form = DeleteUserForm(user=request.user)
         return render(request, 'delete_account.html', {
             'form': form,
         })
 
     def post(self, request):
-        user = request.user
-        form = DeleteUserForm(request.POST, instance=user)
+        form = DeleteUserForm(request.POST, user=request.user)
         if form.is_valid():
             request.user.delete()
             messages.success(request, 'Account deleted successfully!')

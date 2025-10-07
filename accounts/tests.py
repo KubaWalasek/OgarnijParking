@@ -5,7 +5,7 @@ from django.test import TestCase
 from accounts.conftest import user
 from django.contrib.auth.models import User
 from django.urls import reverse
-from accounts.models import UserProfile
+from accounts.models import CustomUser
 
 #################################   REGISTER VIEW TESTS ################################################################
 @pytest.mark.django_db

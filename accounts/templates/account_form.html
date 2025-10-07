@@ -12,11 +12,11 @@
 
                 <h2 class="form-title">
                     {% if url == 'register' %}
-                        Rejestracja konta
+                        Zarejestruj się
                     {% elif url == 'login' %}
-                        Logowanie
+                        Zaloguj się
                     {% elif url == 'user_account' %}
-                        Edycja konta
+                        Edytuj swoje konto
                     {% else %}
                         Formularz
                     {% endif %}
@@ -65,17 +65,20 @@
                 {% elif url == 'register' or url == 'user_account' %}
                     {% if url == 'user_account' %}
                         <div class="form-row">
-                            {{ form.old_password.label_tag }}
-                            {{ form.old_password }}
+                            {{ form.first_name.label_tag }}
+                            {{ form.first_name }}
+                            {% if form.first_name.help_text %}
+                                <small style="color: #5b6b7a;">{{ form.old_password.help_text }}</small>
+                            {% endif %}
                             {% for error in form.old_password.errors %}
                                 <div class="form-error">{{ error }}</div>
                             {% endfor %}
                         </div>
                     {% endif %}
                     <div class="form-row">
-                        {{ form.password1.label_tag }}
-                        {{ form.password1 }}
-                        {% if form.password1.help_text %}
+                        {{ form.last_name.label_tag }}
+                        {{ form.last_name }}
+                        {% if form.last_name.help_text %}
                             <small style="color: #5b6b7a;">{{ form.password1.help_text }}</small>
                         {% endif %}
                         {% for error in form.password1.errors %}
@@ -148,6 +151,7 @@
                 <div>
                 {% if url == 'user_account' %}
                     <a class="big-form-btn-link" href="{% url 'delete_account' %}" >USUŃ KONTO</a>
+                    <a class="big-form-btn-link" href="{% url 'update_password' %}" >ZMIEŃ HASŁO</a>
                 {% endif %}
             </div>
             </form>
