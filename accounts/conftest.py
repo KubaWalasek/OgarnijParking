@@ -1,27 +1,31 @@
 import pytest
-from django.contrib.auth.models import User
-from accounts.models import User
+from django.contrib.auth import get_user_model
+from accounts.models import Adres
 
 
 
 @pytest.fixture
 def user():
-    return User.objects.create_user(
-        username='testuser',
-        email='testuser@example.com',
-        password='Testpassword'
-    )
+    User = get_user_model()
+    user=User.objects.create(email='testuser@example.com')
+    user.set_password('Testpassword')
+    user.save()
+    return user
+
 
 @pytest.fixture
-def userprofile(user):
-    return User.objects.create(
+def adres(user):
+    adres = Adres.objects.create(
         user=user,
-        first_name='testname',
-        last_name='testlastname',
         post_code='12345',
         city='testcity',
         street='teststreet',
-        street_number='123',
-        door_number='456',
-        phone_number='1234567890'
+        house_number='1',
+        apartment_number='1',
+        phone_number='123456789'
     )
+    return adres
+
+
+
+

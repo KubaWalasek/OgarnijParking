@@ -94,7 +94,7 @@ class UserAccountView(LoginRequiredMixin, View):
         form = UpdateUserForm(request.POST, instance=user)
         adres_form = AdresForm(request.POST, instance=adres)
         if form.is_valid() and adres_form.is_valid():
-            if not form.has_changed() and  not adres_form.has_changed():
+            if not form.has_changed() and not adres_form.has_changed():
                 messages.success(request, 'No data updated !')
                 return redirect('user_account')
             form.save()

@@ -1,0 +1,8 @@
+<!-- HTML -->
+<p>Cześć, zapraszam tu:</p>
+<p><a href="{{ map_url }}">Otwórz lokalizację na mapie</a></p>
+{% if static_map_url %}
+    <p><a href="{{ map_url }}"><img src="{{ static_map_url }}" alt="Mapa" style="max-width:100%;"></a></p>
+{% endif %}
+<p>Opis:</p>
+<p>{{ description|linebreaksbr }}</p>
