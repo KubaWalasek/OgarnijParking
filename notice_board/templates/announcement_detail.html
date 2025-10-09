@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block links %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/list.css' %}">
+    <link rel="stylesheet" href="{% static 'css/announcement_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="announcement-detail-hero">
+    <div class="announcement-detail-card">
+        <div class="announcement-detail-header">
+            <div class="announcement-detail-title">{{ announcement.title }}</div>
+            <span class="announcement-detail-category">{{ announcement.category }}</span>
+        </div>
+        <div class="announcement-detail-content">
+            {{ announcement.content|linebreaksbr }}
+        </div>
+        <div class="announcement-detail-footer">
+            Dodano: {{ announcement.createdate|date:"Y-m-d H:i" }},
+            Autor: {{ announcement.author.email }}
+        </div>
+        <a href="{% url 'announcement_list' %}" class="announcement-detail-back">&larr; Powrót do listy ogłoszeń</a>
+    </div>
+</div>
+{% endblock %}

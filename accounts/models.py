@@ -1,17 +1,30 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
-# Create your models here.
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=20, blank=True, null=True)
-    last_name = models.CharField(max_length=20, blank=True, null=True)
-    post_code = models.CharField(max_length=10, blank=True, null=True)
-    city = models.CharField(max_length=30, blank=True, null=True)
-    street = models.CharField(max_length=30, blank=True, null=True)
-    street_number = models.CharField(max_length=10, blank=True, null=True)
-    door_number = models.CharField(max_length=10, blank=True, null=True)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
+
+
+class CustomUser(AbstractUser, PermissionsMixin):
+    username = None
+    email = models.EmailField(_('email address'), unique=True)
+
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
 
     def __str__(self):
-        return self.user.username
+        return self.email
+
+
+class Adres(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, blank=True)
+    post_code = models.CharField(max_length=10, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    street = models.CharField(max_length=100, blank=True )
+    house_number = models.CharField(max_length=10, blank=True)
+    apartment_number = models.CharField(max_length=10, blank=True)
+    phone_number = models.CharField(max_length=10, blank=True)
+    def __str__(self):
+        return f'{self.user.email} / {self.city}'

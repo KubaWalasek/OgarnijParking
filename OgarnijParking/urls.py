@@ -16,8 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
-from OgarnijParking.views import home
+from accounts.views import home
 
 urlpatterns = [
     path('admin/', admin.site.urls),
