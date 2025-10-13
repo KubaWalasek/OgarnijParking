@@ -1,0 +1,37 @@
+
+    <div class="form-hero">+6
+        <div class="form-card">
+            <h2 class="form-title center-title">Moje osiedla</h2>
+            {% if places %}
+                <div class="announcement-grid">
+                    {% for p in places %}
+                        <a href="{% url 'add_place' p.pk  %}" class="announcement-link">
+                            <div class="announcement-tile">
+                                <div class="announcement-tile-main">
+                                    <div class="announcement-tile-title">
+                                        {{ p.district_name }}
+                                    </div>
+                                     <div class="announcement-tile-title">
+                                        {{ p.place_number }}
+                                    </div>
+                                    <div class="announcement-tile-title">
+                                        {{ p.available_from }}
+                                    </div>
+                                    <div class="announcement-tile-title">
+                                        {{ p.available_until }}
+                                    </div>
+                                    <div class="announcement-tile-title">
+                                        {{ p.description }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="form-row">Brak miejsc do wyświetlenia.</div>
+            {% endif %}
+        </div>
+    </div>

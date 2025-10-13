@@ -2,6 +2,8 @@
 {% block links %}
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/add_place.css' %}">
+    <link rel="stylesheet" href="{% static 'css/list.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -22,120 +24,143 @@
                     {% endif %}
                 </h2>
 
-                {# Błędy niezwiązane z konkretnymi polami #}
                 {% for error in form.non_field_errors %}
                     <div class="form-error">{{ error }}</div>
                 {% endfor %}
 
-                {# Messages z widoku #}
                 {% if messages %}
                     {% for m in messages %}
                         <div class="form-error">{{ m }}</div>
                     {% endfor %}
                 {% endif %}
 
-                {# Email #}
-                {% if url == 'login' %}
-                    <div class="form-row">
-                        {{ form.username.label_tag }}
-                        {{ form.username }}
-                        {% for error in form.username.errors %}
-                            <div class="form-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="form-row">
-                        {{ form.email.label_tag }}
-                        {{ form.email }}
-                        {% for error in form.email.errors %}
-                            <div class="form-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
+                <div class="form-card-flex">
+                    <div class="form-sections-row">
+                        <!-- Sekcja użytkownika -->
+                        <section class="form-section">
+                            <h3>Dane użytkownika</h3>
 
-                {# Hasło (login) lub Hasła (register/user_account) #}
-                {% if url == 'login' %}
-                    <div class="form-row">
-                        {{ form.password.label_tag }}
-                        {{ form.password }}
-                        {% for error in form.password.errors %}
-                            <div class="form-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% elif url == 'register' or url == 'user_account' %}
-                    {% if url == 'user_account' %}
-                        <div class="form-row">
-                            {{ form.first_name.label_tag }}
-                            {{ form.first_name }}
-                            {% if form.first_name.help_text %}
-                                <small style="color: #5b6b7a;">{{ form.old_password.help_text }}</small>
+                            {% if url == 'login' %}
+                                <div class="form-row">
+                                    {{ form.username.label_tag }}
+                                    {{ form.username }}
+                                    {% for error in form.username.errors %}
+                                        <div class="form-error">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-row">
+                                    {{ form.password.label_tag }}
+                                    {{ form.password }}
+                                    {% for error in form.password.errors %}
+                                        <div class="form-error">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="form-row">
+                                    {{ form.email.label_tag }}
+                                    {{ form.email }}
+                                    {% for error in form.email.errors %}
+                                        <div class="form-error">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+
+                                {% if url == 'user_account' %}
+                                    <div class="form-row">
+                                        {{ form.first_name.label_tag }}
+                                        {{ form.first_name }}
+                                        {% for error in form.first_name.errors %}
+                                            <div class="form-error">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="form-row">
+                                    {{ form.last_name.label_tag }}
+                                    {{ form.last_name }}
+                                    {% for error in form.last_name.errors %}
+                                        <div class="form-error">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+
+                                {% if url == 'register' %}
+                                    <div class="form-sections-row">
+                                        <div class="form-row">
+                                            {{ form.password1.label_tag }}
+                                            {{ form.password1 }}
+                                            {% for error in form.password1.errors %}
+                                                <div class="form-error">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="form-row">
+                                            {{ form.password2.label_tag }}
+                                            {{ form.password2 }}
+                                            {% for error in form.password2.errors %}
+                                                <div class="form-error">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
                             {% endif %}
-                            {% for error in form.old_password.errors %}
-                                <div class="form-error">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    <div class="form-row">
-                        {{ form.last_name.label_tag }}
-                        {{ form.last_name }}
-                        {% if form.last_name.help_text %}
-                            <small style="color: #5b6b7a;">{{ form.password1.help_text }}</small>
-                        {% endif %}
-                        {% for error in form.password1.errors %}
-                            <div class="form-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <div class="form-row">
-                        {{ form.password2.label_tag }}
-                        {{ form.password2 }}
-                        {% for error in form.password2.errors %}
-                            <div class="form-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <div class="form-row">
-                        {{ adres_form.post_code.label_tag }}
-                        {{ adres_form.post_code }}
-                        {% for error in adres_form.street.errors %}
-                            <div class="form-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <div class="form-row">
-                        {{ adres_form.city.label_tag }}
-                        {{ adres_form.city }}
-                        {% for error in adres_form.street.errors %}
-                            <div class="form-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <div class="form-row">
-                        {{ adres_form.street.label_tag }}
-                        {{ adres_form.street }}
-                        {% for error in adres_form.street.errors %}
-                            <div class="form-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <div class="form-row">
-                        {{ adres_form.house_number.label_tag }}
-                        {{ adres_form.house_number }}
-                        {% for error in adres_form.street.errors %}
-                            <div class="form-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <div class="form-row">
-                        {{ adres_form.apartment_number.label_tag }}
-                        {{ adres_form.apartment_number }}
-                        {% for error in adres_form.street.errors %}
-                            <div class="form-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <div class="form-row">
-                        {{ adres_form.phone_number.label_tag }}
-                        {{ adres_form.phone_number }}
-                        {% for error in adres_form.street.errors %}
-                            <div class="form-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
+                        </section>
 
-                {% endif %}
+                        {% if url == 'user_account' %}
+
+                            <section class="form-section">
+                                <h3>Adres</h3>
+
+                                <div class="form-sections-row">
+                                    <div class="form-row">
+                                        {{ adres_form.post_code.label_tag }}
+                                        {{ adres_form.post_code }}
+                                        {% for error in adres_form.post_code.errors %}
+                                            <div class="form-error">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-row">
+                                        {{ adres_form.city.label_tag }}
+                                        {{ adres_form.city }}
+                                        {% for error in adres_form.city.errors %}
+                                            <div class="form-error">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    {{ adres_form.street.label_tag }}
+                                    {{ adres_form.street }}
+                                    {% for error in adres_form.street.errors %}
+                                        <div class="form-error">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="form-sections-row">
+                                    <div class="form-row">
+                                        {{ adres_form.house_number.label_tag }}
+                                        {{ adres_form.house_number }}
+                                        {% for error in adres_form.house_number.errors %}
+                                            <div class="form-error">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-row">
+                                        {{ adres_form.apartment_number.label_tag }}
+                                        {{ adres_form.apartment_number }}
+                                        {% for error in adres_form.apartment_number.errors %}
+                                            <div class="form-error">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    {{ adres_form.phone_number.label_tag }}
+                                    {{ adres_form.phone_number }}
+                                    {% for error in adres_form.phone_number.errors %}
+                                        <div class="form-error">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </section>
+                        {% endif %}
+                    </div>
+                </div>
 
                 <button type="submit" class="big-form-btn">
                     {% if url == 'register' %}
@@ -148,13 +173,19 @@
                         WYŚLIJ
                     {% endif %}
                 </button>
-                <div>
+
                 {% if url == 'user_account' %}
-                    <a class="big-form-btn-link" href="{% url 'delete_account' %}" >USUŃ KONTO</a>
-                    <a class="big-form-btn-link" href="{% url 'update_password' %}" >ZMIEŃ HASŁO</a>
+                    <div>
+                        <a class="big-form-btn-link" href="{% url 'delete_account' %}">USUŃ KONTO</a>
+                        <a class="big-form-btn-link" href="{% url 'update_password' %}">ZMIEŃ HASŁO</a>
+                    </div>
                 {% endif %}
-            </div>
             </form>
         </div>
+        {% if url == 'user_account' %}
+            <aside class="aside">
+                {% include 'district_list.html' %}
+            </aside>
+        {% endif %}
     </div>
 {% endblock %}

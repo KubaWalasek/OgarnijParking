@@ -1,0 +1,23 @@
+
+.two-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* zwiększa szerokość kolumny z formularzem */
+    gap: 24px;
+}
+.col { flex:1; }
+.aside { width:620px; }
+.card {
+    background:#fff;
+    border:1px solid #e6eef7;
+    border-radius:12px; padding:16px;
+    box-shadow:0 4px 12px
+    rgba(10,37,64,.06);
+}
+.form-row { margin-bottom:12px; }
+.small-title { margin:0 0 12px; font-size:16px; }
+.no-arrow-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: none;
+}

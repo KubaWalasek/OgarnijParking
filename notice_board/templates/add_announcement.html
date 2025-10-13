@@ -1,10 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block links %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="form-hero">
+        <div class="form-card">
+            <form method="post" autocomplete="off" class="form">
+                {% csrf_token %}
+
+                <h2 class="form-title">Dodaj ogłoszenie</h2>
+
+                {# Błędy niezwiązane z polami #}
+                {% for error in form.non_field_errors %}
+                    <div class="form-error">{{ error }}</div>
+                {% endfor %}
+
+                {# Obsługa wszystkich pól formularza osobno, klasy form-row, obsługa błędów i help-textów #}
+                {% for field in form %}
+                    <div class="form-row">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                        {% if field.help_text %}
+                            <small style="color:#5b6b7a;">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="big-form-btn">DODAJ MIEJSCE</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

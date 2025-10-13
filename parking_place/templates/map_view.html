@@ -5,15 +5,15 @@
     <title>Mapa miejsc parkingowych</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/account_links.css' %}">
-    <link rel="stylesheet" href="{% static 'css/home_link.css' %}">
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         #map { height: 500px; width: 500px; margin: 20px 0; }
         .city-select { margin: 20px 0; font-size: 1.1em; }
     </style>
 </head>
+
 <body>
-{% include 'home_link.html' %}
 {% include 'accounts_links.html' %}
 <h2>Wybierz miasto i zobacz mapę parkingową</h2>
 
@@ -27,7 +27,7 @@
 
 <div id="map"></div>
 
-<!-- Leaflet JS -->
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
     // Współrzędne miast

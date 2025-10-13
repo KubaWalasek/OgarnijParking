@@ -6,12 +6,15 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/account_links.css' %}">
     <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/parking_links.css' %}">
     {% block links %}{% endblock %}
 
 </head>
 
 <body>
 {% include 'accounts_links.html' %}
+{%  include 'parking_links.html' %}
+
 <!-- HTML -->
 
 

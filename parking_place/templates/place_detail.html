@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block links %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/list.css' %}">
+    <link rel="stylesheet" href="{% static 'css/announcement_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="announcement-detail-hero">
+    <div class="announcement-detail-card">
+        <div class="announcement-detail-header">
+            <div class="announcement-detail-title">{{ place.district_name }}</div>
+            <span class="announcement-detail-category">{{ place.place_number }}</span>
+        </div>
+        <div class="announcement-detail-content">
+            {{ place.description|linebreaksbr }}
+        </div>
+
+        <a href="{% url 'user_account' %}" class="announcement-detail-back">&larr; Powrót </a>
+    </div>
+</div>
+{% endblock %}

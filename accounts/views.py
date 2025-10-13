@@ -5,6 +5,8 @@ from django.shortcuts import render, redirect
 from django.views import View
 from accounts.forms import CreateUserForm, UpdateUserForm, AdresForm, DeleteUserForm, LoginForm, UpdatePasswordForm
 from accounts.models import Adres
+from parking_place.forms import DistrictNameForm, DistrictForm
+from parking_place.models import District
 
 
 ######################################################################################################
@@ -78,34 +80,49 @@ class LogoutView(View):
 ######################################################################################################
 class UserAccountView(LoginRequiredMixin, View):
     def get(self, request):
+
         user = request.user
-        form = UpdateUserForm(instance=user)
+        update_user_form = UpdateUserForm(instance=user)
+        district_form = DistrictForm()
+        add_district_name_form = DistrictNameForm()
         adres, created = Adres.objects.get_or_create(user=user)
         adres_form = AdresForm(instance=adres)
         return render(request, 'account_form.html', {
-            'form': form,
+            'form': update_user_form,
             'adres_form': adres_form,
-            'url': 'user_account'
+            'url': 'user_account',
+            'district_form': district_form,
+            'add_district_name_form': add_district_name_form,
+
         })
 
     def post(self, request):
+
         user = request.user
         adres, _ = Adres.objects.get_or_create(user=user)
-        form = UpdateUserForm(request.POST, instance=user)
+        update_user_form = UpdateUserForm(request.POST, instance=user)
         adres_form = AdresForm(request.POST, instance=adres)
-        if form.is_valid() and adres_form.is_valid():
-            if not form.has_changed() and not adres_form.has_changed():
+        add_user_to_district_form = DistrictForm(request.POST)
+        add_district_name_form = DistrictNameForm(request.POST)
+
+        if update_user_form.is_valid() and adres_form.is_valid():
+            if not update_user_form.has_changed() and not adres_form.has_changed():
                 messages.success(request, 'No data updated !')
                 return redirect('user_account')
-            form.save()
+            update_user_form.save()
             adres_form.save()
             messages.success(request, 'Account updated successfully!')
             return redirect('user_account')
+
+
         return render(request, 'account_form.html', {
-            'form': form,
+            'update_user_form': update_user_form,
             'adres_form': adres_form,
             'url': 'user_account',
+            'add_user_to_district_form': add_user_to_district_form,
+            'add_district_name_form': add_district_name_form,
         })
+
 
 class UpdatePasswordView(LoginRequiredMixin, View):
     def get(self, request):

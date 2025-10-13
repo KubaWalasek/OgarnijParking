@@ -2,8 +2,12 @@
 
 <div class="accounts-links">
 
+{#    <a href="{% url 'add_place' %}" class="accounts-link" aria-label="Dodaj miejsce">#}
+{#        <img src="{% static 'images/add_place.png' %}" alt="Dodaj miejsce" title="Dodaj miejsce">#}
+{#    </a>#}
+
     <a href="{% url 'create_invitation' %}" class="accounts-link" aria-label="Zaproszenie">
-        <img src="{% static 'images/invitation.png' %}" alt="Reset hasła" title="Zaproszenie">
+        <img src="{% static 'images/invitation.png' %}" alt="Zaproszenie" title="Zaproszenie">
     </a>
 
     <a href="{% url 'announcement_list' %}" class="accounts-link" aria-label="announcement_list">

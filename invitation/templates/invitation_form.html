@@ -1,10 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Wyślij zaproszenie</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/account_links.css' %}">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        #map { height: 500px; width: 100%; margin: 20px 0; }
+        .city-select { margin: 20px 0; font-size: 1.1em; }
+    </style>
 </head>
+
 <body>
-$END$
+{% include 'accounts_links.html' %}
+
+<div class="form-hero">
+    <div class="form-card">
+        <form method="post" autocomplete="off" class="form">
+
+            {% csrf_token %}
+            <h2 class="form-title">Wyślij zaproszenie</h2>
+
+            <div class="form-row">
+                <label for="author_display">Autor:</label>
+                <input id="author_display" type="text" class="readonly" value="{{ request.user.email }}" readonly>
+            </div>
+
+            <div class="form-row">
+                <label>Lokalizacja (kliknij na mapie):</label>
+                <select id="city-select" class="city-select">
+                    <option value="warszawa">Warszawa</option>
+                    <option value="krakow">Kraków</option>
+                    <option value="wroclaw">Wrocław</option>
+                    <option value="poznan">Poznań</option>
+                    <option value="gdansk">Gdańsk</option>
+                </select>
+                <div id="map"></div>
+                <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+                <script>
+                    // Współrzędne miast
+                    const cityCoords = {
+                        warszawa: [52.2297, 21.0122],
+                        krakow:   [50.0619, 19.9368],
+                        wroclaw:  [51.1079, 17.0385],
+                        poznan:   [52.4064, 16.9252],
+                        gdansk:   [54.3520, 18.6466],
+                    };
+
+                    let map = L.map('map').setView(cityCoords.warszawa, 12);
+                    let marker = null;
+                    function placeMarker(lat, lng) {
+
+                        let latInput = document.getElementById("id_latitude");
+                        let lngInput = document.getElementById("id_longitude");
+
+                        if (marker) { marker.setLatLng([lat, lng]); }
+                            else { marker = L.marker([lat, lng], {draggable: true}).addTo(map); }
+                            latInput.value = lat.toFixed(6);
+                            lngInput.value = lng.toFixed(6);
+                        }
+
+                        map.on('click', function(e) {
+                            placeMarker(e.latlng.lat, e.latlng.lng);
+                        });
+
+                        map.on('layeradd', function() {
+                            if (marker) {
+                                marker.on('dragend', function(ev) {
+                                    var p = ev.target.getLatLng();
+                                    latInput.value = p.lat.toFixed(6);
+                                    lngInput.value = p.lng.toFixed(6);
+                                });
+                            }
+                        });
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+                        maxZoom: 18,
+                    }).addTo(map);
+
+                    document.getElementById('city-select').addEventListener('change', function() {
+                        const city = this.value;
+                        const coords = cityCoords[city];
+                        map.setView(coords, 12);
+                    });
+
+                </script>
+                <small>Po kliknięciu w mapę współrzędne zostaną ustawione automatycznie.</small>
+            </div>
+
+            {{ form.latitude }}
+            {{ form.longitude }}
+
+           <div class="form-row">
+                <p>Dodaj odbiorcę</p>
+                {{ form.email.label_tag }}
+                {{ form.email }}
+                {% for error in form.email.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="form-row">
+                {{ form.description.label_tag }}
+                {{ form.description }}
+                {% for error in form.description.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+            </div>
+
+            {% for error in form.non_field_errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+
+            <button type="submit" class="big-form-btn">Wyślij zaproszenie</button>
+        </form>
+    </div>
+</div>
 </body>
 </html>
