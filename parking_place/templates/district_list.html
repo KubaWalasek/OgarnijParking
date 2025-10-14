@@ -26,7 +26,7 @@
          <aside class="aside">
              <div class="card">
                  <h2 class="form-title">Dodaj mnie do osiedla</h2>
-                 <form method="post" action="{% url 'add_to_district' %}"  autocomplete="off">
+                 <form method="post" action="{% url 'district' %}"  autocomplete="off">
                      {% csrf_token %}
                      <div class="form-row">
                           {{ district_form.district_name}}
@@ -41,7 +41,7 @@
          <aside class="aside">
              <div class="card">
                  <h2 class="form-title">Dodaj nowe osiedle</h2>
-                 <form method="post" action="{% url 'add_new_district' %}" autocomplete="off">
+                 <form method="post" action="{% url 'district' %}" autocomplete="off">
                      {% csrf_token %}
                      <div class="form-row">
                           {{ add_district_name_form.district_name}}
