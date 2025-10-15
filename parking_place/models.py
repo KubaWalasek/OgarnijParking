@@ -1,3 +1,5 @@
+from django.db.models import UniqueConstraint
+from django.db.models.functions import Lower
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
@@ -7,6 +9,13 @@ import re
 
 class DistrictName(models.Model):
     district_name = models.CharField(max_length=100)
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                Lower('district_name'),
+                name='uniq_district_name_ci'
+            )
+        ]
     def save(self, *args, **kwargs):
         if self.district_name:
             self.district_name = self.district_name.strip().title()
@@ -27,6 +36,13 @@ class PostCode(models.Model):
 
 class StreetName(models.Model):
     street_name = models.CharField(max_length=100)
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                Lower('street_name'),
+                name='uniq_street_name_ci'
+            )
+        ]
     def save(self, *args, **kwargs):
         if self.street_name:
             self.street_name = self.street_name.strip().title()
@@ -37,6 +53,13 @@ class StreetName(models.Model):
 
 class CityName(models.Model):
     city_name = models.CharField(max_length=100)
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                Lower('city_name'),
+                name='uniq_city_name_ci'
+            )
+        ]
     def save(self, *args, **kwargs):
         if self.city_name:
             self.city_name = self.city_name.strip().title()
@@ -51,8 +74,6 @@ class District(models.Model):
     city = models.ForeignKey(CityName, on_delete=models.PROTECT)
     street = models.ForeignKey(StreetName, on_delete=models.PROTECT, blank=True, null=True)
     signed_user = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='signed_user')
-
-
 
     def __str__(self):
         return f' {self.post_code} osiedle {self.district_name}'

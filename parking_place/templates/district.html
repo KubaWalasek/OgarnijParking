@@ -3,69 +3,68 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
     <link rel="stylesheet" href="{% static 'css/add_place.css' %}">
+    <link rel="stylesheet" href="{% static 'css/list.css' %}">
 {% endblock %}
+
 {% block content %}
-<div class="form-hero">
 
-<form method="post" action="{% url 'add_district_name' %}" autocomplete="off">
-    {% csrf_token %}
-    <div class="form-row no-arrow-select">
-        {{ add_district_name_form.district_name.label_tag }} {{ add_district_name_form.district_name }}
-        {% for e in add_district_name_form.district_name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+
+
+    <div class="form-hero">
+        <form method="get" autocomplete="off">
+            <h2 class="form-title center-title">Znajdź osiedle</h2>
+            <div class="form-row no-arrow-select">
+                {{ district_search_form.district_name.label_tag }} {{ district_search_form.district_name }}
+                {{ district_search_form.city_name.label_tag }} {{ district_search_form.city_name }}
+                {{ district_search_form.street_name.label_tag }} {{ district_search_form.street_name }}
+                {{ district_search_form.post_code.label_tag }} {{ district_search_form.post_code }}
+            </div>
+            <button type="submit" class="big-form-btn">Szukaj</button>
+        </form>
+
+        <div class="form-card">
+            <h2 class="form-title center-title">Dołącz do osiedla</h2>
+            {% if districts %}
+                {% for district in districts %}
+                        <div class="announcement-tile">
+                            <div class="announcement-tile-main">
+                                <div class="announcement-tile-title">
+                                    {{ district.post_code }} {{ district.city }}, {{ district.district_name }}
+                                    <form action="{% url 'add_user_to_district_pk' district.pk %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit">Dodaj do osiedla</button>
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+                {% endfor %}
+
+                {% for error in form.non_field_errors %}
+                    <div class="form-error">{{ error }}</div>
+                {% endfor %}
+
+                {% if messages %}
+                    {% for m in messages %}
+                        <div class="form-error">{{ m }}</div>
+                    {% endfor %}
+                {% endif %}
+
+            {% else %}
+
+                <div>
+                    <aside class="aside" style="justify-content:center; display:flex;">
+                        <a href="{% url 'add_district' %}" class="accounts-link" aria-label="Dodaj mnie do osiedla">
+                            <img src="{% static 'images/dodajdo.png' %}" alt="Dodaj mnie do osiedla"
+                                 title="Dodaj mnie do osiedla" style="width:96px; height:auto;">
+                        </a>
+                    </aside>
+                </div>
+                <div class="form-row">Brak osiedli do wyświetlenia. Dodaj osiedle.</div>
+            {% endif %}
+        </div>
+
+
+
     </div>
-    <button type="submit" class="big-form-btn">Dodaj nazwę osiedla</button>
-</form>
-
-<form method="post" action="{% url 'add_post_code' %}" autocomplete="off">
-    {% csrf_token %}
-    <div class="form-row no-arrow-select">
-        {{ add_post_code_form.post_code.label_tag }} {{ add_post_code_form.post_code }}
-        {% for e in add_post_code_form.post_code.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
-    </div>
-    <button type="submit" class="big-form-btn">Dodaj kod pocztowy</button>
-</form>
-
-<form method="post" action="{% url 'add_street_name' %}" autocomplete="off">
-    {% csrf_token %}
-    <div class="form-row no-arrow-select">
-        {{ add_street_name_form.street_name.label_tag }} {{ add_street_name_form.street_name }}
-        {{ add_street_name_form.street_number.label_tag }} {{ add_street_name_form.street_number }}
-        {% for e in district_name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
-    </div>
-    <button type="submit" class="big-form-btn">Dodaj ulice</button>
-</form>
-
-<form method="post" action="{% url 'add_city' %}" autocomplete="off">
-    {% csrf_token %}
-    <div class="form-row no-arrow-select">
-        {{ add_city_name_form.city_name.label_tag }} {{ add_city_name_form.city_name }}
-        {% for e in add_city_name_form.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
-    </div>
-    <button type="submit" class="big-form-btn">Dodaj miejscowość</button>
-</form>
-
-<form method="post" action="{% url 'create_district' %}" autocomplete="off">
-    {% csrf_token %}
-    <div class="form-row no-arrow-select">
-        {{ create_district_form.district_name.label_tag }} {{ create_district_form.district_name }}
-        {{ create_district_form.post_code.label_tag }} {{ create_district_form.post_code }}
-        {{ create_district_form.city.label_tag }} {{ create_district_form.city }}
-        {{ create_district_form.street.label_tag }} {{ create_district_form.street }}
-
-        {% for e in district_name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
-    </div>
-    <button type="submit" class="big-form-btn">Utwórz osiedle</button>
-</form>
-<form method="post" action="{% url 'add_user_to_district' %}" autocomplete="off">
-    {% csrf_token %}
-    <div class="form-row no-arrow-select">
-        {{ add_user_to_district_form.district.label_tag }} {{ add_user_to_district_form.district }}
-        {% for e in add_user_to_district_form.district_name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
-    </div>
-    <button type="submit" class="big-form-btn">Utwórz osiedle</button>
-</form>
-
-
-
-</div>
 {% endblock %}

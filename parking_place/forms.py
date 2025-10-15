@@ -49,12 +49,17 @@ class DistrictForm(forms.ModelForm):
         }
 
 
-
 class ParkingPlaceDataForm(forms.ModelForm):
     class Meta:
         model = ParkingPlaceData
         fields = ('place_number', 'available_from', 'available_until', 'description')
 
 class AddUserToDistrictForm(forms.Form):
-
        district = forms.ModelChoiceField(queryset=District.objects.all())
+
+
+class DistrictSearchForm(forms.Form):
+    district_name = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'placeholder': 'Osiedle'}), required=False)
+    city_name = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'placeholder': 'Miasto'}), required=False)
+    street_name = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'placeholder': 'Ulica'}), required=False)
+    post_code = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'placeholder': 'Kod pocztowy'}), required=False)
