@@ -7,22 +7,7 @@ from django.core.exceptions import ValidationError
 import re
 
 
-class DistrictName(models.Model):
-    district_name = models.CharField(max_length=100)
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                Lower('district_name'),
-                name='uniq_district_name_ci'
-            )
-        ]
-    def save(self, *args, **kwargs):
-        if self.district_name:
-            self.district_name = self.district_name.strip().title()
-        super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.district_name
 
 class PostCode(models.Model):
     post_code = models.CharField(max_length=6)
@@ -35,7 +20,7 @@ class PostCode(models.Model):
         return self.post_code
 
 class StreetName(models.Model):
-    street_name = models.CharField(max_length=100)
+    street_name = models.CharField(max_length=100, blank=True, null=True)
     class Meta:
         constraints = [
             UniqueConstraint(
@@ -68,12 +53,25 @@ class CityName(models.Model):
     def __str__(self):
         return self.city_name
 
+
 class District(models.Model):
-    district_name = models.ForeignKey(DistrictName, on_delete=models.PROTECT)
+    district_name = models.CharField(max_length=100)
     post_code = models.ForeignKey(PostCode, on_delete=models.PROTECT)
-    city = models.ForeignKey(CityName, on_delete=models.PROTECT)
-    street = models.ForeignKey(StreetName, on_delete=models.PROTECT, blank=True, null=True)
+    city_name = models.ForeignKey(CityName, on_delete=models.PROTECT)
+    street_name = models.ForeignKey(StreetName, on_delete=models.PROTECT, blank=True, null=True)
     signed_user = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='signed_user')
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                Lower('district_name'),
+                name='uniq_district_name_ci'
+            )
+        ]
+    def save(self, *args, **kwargs):
+        if self.district_name:
+            self.district_name = self.district_name.strip().title()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f' {self.post_code} osiedle {self.district_name}'

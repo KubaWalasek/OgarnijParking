@@ -1,12 +1,5 @@
 from django import forms
-from .models import District,  ParkingPlaceData, PostCode, StreetName, CityName, DistrictName
-
-
-class DistrictNameForm(forms.ModelForm):
-    class Meta:
-        model = DistrictName
-        fields = ('district_name',)
-        widgets = {'district_name': forms.TextInput(attrs={'placeholder': 'dzielnica'})}
+from .models import District,  ParkingPlaceData, PostCode, StreetName, CityName
 
 
 class PostCodeForm(forms.ModelForm):
@@ -16,17 +9,12 @@ class PostCodeForm(forms.ModelForm):
         widgets = {'post_code': forms.TextInput(attrs={'placeholder': 'Kod pocztowy'})}
 
 
-
 class StreetNameForm(forms.ModelForm):
-    street_number = forms.CharField(required=False)
+    street_name = forms.CharField(required=False)
     class Meta:
         model = StreetName
-        fields = ('street_name', 'street_number')
-        widgets = {
-            'street_name': forms.TextInput(attrs={'placeholder': 'Ulica'}),
-            'street_number': forms.TextInput(attrs={'placeholder': 'Numer'})
-            }
-
+        fields = ('street_name',)
+        widgets = {'street_name': forms.TextInput(attrs={'placeholder': 'Ulica'})}
 
 
 class CityNameForm(forms.ModelForm):
@@ -36,17 +24,20 @@ class CityNameForm(forms.ModelForm):
         widgets = {'city_name': forms.TextInput(attrs={'placeholder': 'Miasto'})}
 
 
-
 class DistrictForm(forms.ModelForm):
     class Meta:
         model = District
-        fields = ('district_name', 'city', 'street', 'post_code')
+        fields = ('district_name', 'city_name', 'street_name', 'post_code')
         widgets = {
-            'district_name': forms.Select(),
+            'district_name': forms.TextInput(attrs={'placeholder': 'Osiedle'}),
             'post_code': forms.Select(),
-            'city': forms.Select(),
-            'street': forms.Select(),
+            'city_name': forms.Select(),
+            'street_name': forms.Select(),
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['street_name'].required = False
+        self.fields['street_name'].empty_label = '— brak ulicy —'
 
 
 class ParkingPlaceDataForm(forms.ModelForm):
@@ -55,7 +46,11 @@ class ParkingPlaceDataForm(forms.ModelForm):
         fields = ('place_number', 'available_from', 'available_until', 'description')
 
 class AddUserToDistrictForm(forms.Form):
-       district = forms.ModelChoiceField(queryset=District.objects.all())
+       selected_districts = forms.ModelMultipleChoiceField(
+           queryset=District.objects.all(),
+           widget=forms.CheckboxSelectMultiple,
+           required=True
+       )
 
 
 class DistrictSearchForm(forms.Form):

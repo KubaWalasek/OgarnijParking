@@ -3,8 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.views import View
 from parking_place.forms import DistrictForm, PostCodeForm, StreetNameForm, CityNameForm, \
-    ParkingPlaceDataForm, DistrictNameForm, AddUserToDistrictForm, DistrictSearchForm
-from parking_place.models import District, DistrictName, PostCode, CityName, StreetName
+    ParkingPlaceDataForm, AddUserToDistrictForm, DistrictSearchForm
+from parking_place.models import District, PostCode, CityName, StreetName
 
 
 # Create your views here.
@@ -24,14 +24,20 @@ class PlaceListView(View):
 
 class AddUserToDistrictView(View):
     def post(self, request):
+
         add_user_to_district_form = AddUserToDistrictForm(request.POST)
         if add_user_to_district_form.is_valid():
-            district = add_user_to_district_form.cleaned_data['district']
-            district.signed_user.add(request.user)
-            messages.success(request, 'User added successfully!')
+            selected_districts = add_user_to_district_form.cleaned_data['selected_districts']
+            for district in selected_districts:
+                if not district.signed_user.filter(pk=request.user.pk).exists():
+                    district.signed_user.add(request.user)
+                    messages.success(request, 'You successfully joined selected districts.')
+            messages.error(request, 'You already joined selected districts.')
             return redirect('district')
-        messages.error(request, 'Invalid data!')
-        return redirect('district')
+
+
+
+
 
 class AddUserToDistrictPkView(View):
     def post(self, request,pk):
@@ -39,14 +45,14 @@ class AddUserToDistrictPkView(View):
         if not district.signed_user.filter(pk=request.user.pk).exists():
             district.signed_user.add(request.user)
             messages.success(request, 'User added successfully!')
-            return redirect('user_account')
+            return redirect('district')
         messages.error(request, 'You already joined this district!')
         return redirect('district')
 
 
 class DistrictView(View):
     def get(self, request):
-        add_district_name_form = DistrictNameForm()
+
         add_post_code_form = PostCodeForm()
         add_street_name_form = StreetNameForm()
         add_city_name_form = CityNameForm()
@@ -54,28 +60,33 @@ class DistrictView(View):
         add_user_to_district_form = AddUserToDistrictForm()
         district_search_form = DistrictSearchForm(request.GET or None)
 
-        districts = District.objects.all().order_by('district_name__district_name')
+        districts = District.objects.all().order_by('district_name')
+        print(districts)
         if district_search_form.is_valid():
             district_name = (district_search_form.cleaned_data.get('district_name') or '').strip()
             city_name = (district_search_form.cleaned_data.get('city_name') or '').strip()
             street_name = (district_search_form.cleaned_data.get('street_name') or '').strip()
             post_code = (district_search_form.cleaned_data.get('post_code') or '').strip()
+            print(district_name, city_name, street_name, post_code)
 
             if district_name:
-                districts = districts.filter(district_name__district_name__icontains=district_name)
+                districts = districts.filter(district_name__icontains=district_name)
+            print('name', districts.count())
 
             if city_name:
-                districts = districts.filter(city__city_name__icontains=city_name)
+                districts = districts.filter(city_name__city_name__icontains=city_name)
+            print('city',districts.count())
 
             if street_name:
-                districts = districts.filter(street__street_name__icontains=street_name)
+                districts = districts.filter(street_name__street_name__icontains=street_name)
+            print('streeet_name', districts.count())
 
             if post_code:
                 districts = districts.filter(post_code__post_code__icontains=post_code)
-
+            print('post_code', districts.count())
 
         return render(request, 'district.html', {
-            'add_district_name_form': add_district_name_form,
+
             'add_post_code_form': add_post_code_form,
             'add_street_name_form': add_street_name_form,
             'add_city_name_form': add_city_name_form,
@@ -83,12 +94,11 @@ class DistrictView(View):
             'add_user_to_district_form': add_user_to_district_form,
             'district_search_form': district_search_form,
             'districts': districts,
-
         })
 
 class AddDistrictView(View):
     def get(self, request):
-        add_district_name_form = DistrictNameForm()
+
         add_post_code_form = PostCodeForm()
         add_street_name_form = StreetNameForm()
         add_city_name_form = CityNameForm()
@@ -96,7 +106,7 @@ class AddDistrictView(View):
         add_user_to_district_form = AddUserToDistrictForm()
 
         return render(request, 'add_district.html', {
-            'add_district_name_form': add_district_name_form,
+
             'add_post_code_form': add_post_code_form,
             'add_street_name_form': add_street_name_form,
             'add_city_name_form': add_city_name_form,
@@ -113,20 +123,6 @@ class ParkingPlaceView(View):
         })
 
 
-class AddDistrictNameView(View):
-
-    def post(self, request):
-        add_district_name_form = DistrictNameForm(request.POST)
-        if add_district_name_form.is_valid():
-            district_name = add_district_name_form.cleaned_data['district_name']
-            if DistrictName.objects.filter(district_name=district_name).exists():
-                messages.error(request, 'District name already exists!')
-                return redirect('add_district')
-            add_district_name_form.save()
-            messages.success(request, 'District name added successfully!')
-            return redirect('add_district')
-        messages.error(request, 'Invalid data!')
-        return redirect('add_district')
 
 class AddPostCodeView(View):
 
@@ -178,20 +174,12 @@ class CreateDistrictView(View):
     def post(self, request):
         create_district_form = DistrictForm(request.POST)
         if create_district_form.is_valid():
-            district_name = create_district_form.cleaned_data['district_name']
-            city_name = create_district_form.cleaned_data['city']
-            street_name = create_district_form.cleaned_data['street']
-            post_code = create_district_form.cleaned_data['post_code']
-            if District.objects.filter(
-                district_name=district_name,
-                city=city_name,
-                street=street_name,
-                post_code=post_code).exists():
-                messages.error(request, 'District already exists!')
-                return redirect('add_district')
+
+
             create_district_form.save()
             messages.success(request, 'District created successfully!')
             return redirect('add_district')
+        messages.error(request, 'Invalid district data!')
         return redirect('add_district')
 
 class AddParkingPlaceView(View):

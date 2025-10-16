@@ -8,63 +8,53 @@
 
 {% block content %}
 
-
-
     <div class="form-hero">
-        <form method="get" autocomplete="off">
+        <form method="get" autocomplete="off" style="padding-right:45px">
             <h2 class="form-title center-title">Znajdź osiedle</h2>
             <div class="form-row no-arrow-select">
                 {{ district_search_form.district_name.label_tag }} {{ district_search_form.district_name }}
                 {{ district_search_form.city_name.label_tag }} {{ district_search_form.city_name }}
                 {{ district_search_form.street_name.label_tag }} {{ district_search_form.street_name }}
                 {{ district_search_form.post_code.label_tag }} {{ district_search_form.post_code }}
+                {{ district_search_form.errors }}
             </div>
             <button type="submit" class="big-form-btn">Szukaj</button>
         </form>
 
         <div class="form-card">
-            <h2 class="form-title center-title">Dołącz do osiedla</h2>
+            <h2 class="form-title center-title">Wybierz swoje osiedle</h2>
             {% if districts %}
-                {% for district in districts %}
-                        <div class="announcement-tile">
-                            <div class="announcement-tile-main">
-                                <div class="announcement-tile-title">
-                                    {{ district.post_code }} {{ district.city }}, {{ district.district_name }}
-                                    <form action="{% url 'add_user_to_district_pk' district.pk %}" method="post" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit">Dodaj do osiedla</button>
-                                    </form>
-                                </div>
-
-                            </div>
+                <div class="announcement-tile">
+                    <div class="announcement-tile-main">
+                        <div class="announcement-tile-title">
+                             <form method="post" action="{% url 'add_user_to_district' %}">
+                              {% csrf_token %}
+                              {{ add_user_to_district_form.selected_districts }}
+                              <button type="submit">DOŁĄCZ</button>
+                            </form>
                         </div>
-                {% endfor %}
+                    </div>
+                </div>
 
                 {% for error in form.non_field_errors %}
                     <div class="form-error">{{ error }}</div>
                 {% endfor %}
-
                 {% if messages %}
                     {% for m in messages %}
                         <div class="form-error">{{ m }}</div>
                     {% endfor %}
                 {% endif %}
-
             {% else %}
-
                 <div>
                     <aside class="aside" style="justify-content:center; display:flex;">
                         <a href="{% url 'add_district' %}" class="accounts-link" aria-label="Dodaj mnie do osiedla">
                             <img src="{% static 'images/dodajdo.png' %}" alt="Dodaj mnie do osiedla"
-                                 title="Dodaj mnie do osiedla" style="width:96px; height:auto;">
+                             title="Dodaj mnie do osiedla" style="width:96px; height:auto;">
                         </a>
                     </aside>
                 </div>
                 <div class="form-row">Brak osiedli do wyświetlenia. Dodaj osiedle.</div>
             {% endif %}
         </div>
-
-
-
     </div>
 {% endblock %}

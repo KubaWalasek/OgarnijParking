@@ -2,7 +2,7 @@ from django.urls import path
 
 from parking_place.views import map_view, AddPostCodeView, \
     AddStreetNameView, AddCityNameView, CreateDistrictView, AddParkingPlaceView, DistrictView, ParkingPlaceView, \
-    AddDistrictNameView, AddUserToDistrictView, AddDistrictView, AddUserToDistrictPkView
+    AddUserToDistrictView, AddDistrictView, AddUserToDistrictPkView
 
 urlpatterns = [
     path('map/', map_view, name='map_view'),
@@ -12,7 +12,6 @@ urlpatterns = [
     path('district/<int:pk>', AddUserToDistrictPkView.as_view(), name='add_user_to_district_pk'),
     path('add_district/', AddDistrictView.as_view(), name='add_district'),
     path('add_post_code/', AddPostCodeView.as_view(), name='add_post_code'),
-    path('add_district_name/', AddDistrictNameView.as_view(), name='add_district_name'),
     path('add_street_name/', AddStreetNameView.as_view(), name='add_street_name'),
     path('add_city_name/', AddCityNameView.as_view(), name='add_city'),
     path('create_district/', CreateDistrictView.as_view(), name='create_district'),
