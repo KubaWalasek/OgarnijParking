@@ -22,9 +22,6 @@ class PlaceListView(View):
         })
 
 
-
-
-
 class AddUserToDistrictPkView(View):
     def post(self, request,pk):
         district = District.objects.get(pk=pk)
@@ -64,21 +61,32 @@ class DistrictView(View):
             'districts': districts,
         })
 
-class AddUserToDistrictView(View):
+class AddOrRemoveUserFromDistrictView(View):
     def post(self, request):
-
+        action = request.POST.get('action')
         add_user_to_district_form = AddUserToDistrictForm(request.POST)
         if add_user_to_district_form.is_valid():
-            selected_districts = add_user_to_district_form.cleaned_data['selected_districts']
-            for district in selected_districts:
-                if not district.signed_user.filter(pk=request.user.pk).exists():
-                    district.signed_user.add(request.user)
-                    messages.success(request, 'User added successfully!')
-                else:
-                    messages.error(request, 'You already joined this district!')
-            return redirect('district')
-        messages.error(request, 'No data selected.')
-        return redirect('district')
+            if action =='add':
+                selected_districts = add_user_to_district_form.cleaned_data['selected_districts']
+                for district in selected_districts:
+                    if not district.signed_user.filter(pk=request.user.pk).exists():
+                        district.signed_user.add(request.user)
+                        messages.success(request, 'User added successfully!')
+                    else:
+                        messages.error(request, 'You already joined this district!')
+                return redirect('district')
+            elif action == 'remove':
+                selected_districts = add_user_to_district_form.cleaned_data['selected_districts']
+                for district in selected_districts:
+                    if district.signed_user.filter(pk=request.user.pk).exists():
+                        district.signed_user.remove(request.user)
+                        messages.success(request, 'User removed successfully!')
+                    else:
+                        messages.error(request, 'You are not joined this district!')
+                return redirect('district')
+            else:
+                messages.error(request, 'No data selected.')
+
 
 
 class AddDistrictView(View):
@@ -87,13 +95,12 @@ class AddDistrictView(View):
         add_street_name_form = StreetNameForm()
         add_city_name_form = CityNameForm()
         create_district_form = DistrictForm()
-        add_user_to_district_form = AddUserToDistrictForm()
+
         return render(request, 'add_district.html', {
             'add_post_code_form': add_post_code_form,
             'add_street_name_form': add_street_name_form,
             'add_city_name_form': add_city_name_form,
             'create_district_form': create_district_form,
-            'add_user_to_district_form': add_user_to_district_form,
         })
 
 

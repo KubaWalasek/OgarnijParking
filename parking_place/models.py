@@ -74,7 +74,7 @@ class District(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f' {self.post_code} osiedle {self.district_name}'
+        return f' {self.post_code} {self.city_name}, osiedle {self.district_name}'
 
 class ParkingPlaceData(models.Model):
     district = models.ForeignKey(District, on_delete=models.CASCADE)
