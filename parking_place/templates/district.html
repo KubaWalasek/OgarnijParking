@@ -20,7 +20,6 @@
             </div>
             <button type="submit" class="big-form-btn">Szukaj</button>
         </form>
-
         <div class="form-card">
             <h2 class="form-title center-title">Wybierz swoje osiedle</h2>
             {% if districts %}
@@ -30,7 +29,7 @@
                              <form method="post" action="{% url 'add_user_to_district' %}">
                               {% csrf_token %}
                               {{ add_user_to_district_form.selected_districts }}
-                              <button type="submit">DOŁĄCZ</button>
+                                 <button type="submit" class="big-form-btn">DOŁĄCZ</button>
                             </form>
                         </div>
                     </div>

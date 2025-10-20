@@ -22,20 +22,6 @@ class PlaceListView(View):
         })
 
 
-class AddUserToDistrictView(View):
-    def post(self, request):
-
-        add_user_to_district_form = AddUserToDistrictForm(request.POST)
-        if add_user_to_district_form.is_valid():
-            selected_districts = add_user_to_district_form.cleaned_data['selected_districts']
-            for district in selected_districts:
-                if not district.signed_user.filter(pk=request.user.pk).exists():
-                    district.signed_user.add(request.user)
-                    messages.success(request, 'You successfully joined selected districts.')
-            messages.error(request, 'You already joined selected districts.')
-            return redirect('district')
-
-
 
 
 
@@ -52,61 +38,57 @@ class AddUserToDistrictPkView(View):
 
 class DistrictView(View):
     def get(self, request):
-
-        add_post_code_form = PostCodeForm()
-        add_street_name_form = StreetNameForm()
-        add_city_name_form = CityNameForm()
-        create_district_form = DistrictForm()
         add_user_to_district_form = AddUserToDistrictForm()
         district_search_form = DistrictSearchForm(request.GET or None)
-
-        districts = District.objects.all().order_by('district_name')
-        print(districts)
+        districts = District.objects.all()
         if district_search_form.is_valid():
             district_name = (district_search_form.cleaned_data.get('district_name') or '').strip()
             city_name = (district_search_form.cleaned_data.get('city_name') or '').strip()
             street_name = (district_search_form.cleaned_data.get('street_name') or '').strip()
             post_code = (district_search_form.cleaned_data.get('post_code') or '').strip()
-            print(district_name, city_name, street_name, post_code)
 
             if district_name:
                 districts = districts.filter(district_name__icontains=district_name)
-            print('name', districts.count())
-
             if city_name:
                 districts = districts.filter(city_name__city_name__icontains=city_name)
-            print('city',districts.count())
-
             if street_name:
                 districts = districts.filter(street_name__street_name__icontains=street_name)
-            print('streeet_name', districts.count())
-
             if post_code:
                 districts = districts.filter(post_code__post_code__icontains=post_code)
-            print('post_code', districts.count())
+
+        add_user_to_district_form.fields['selected_districts'].queryset = districts
 
         return render(request, 'district.html', {
-
-            'add_post_code_form': add_post_code_form,
-            'add_street_name_form': add_street_name_form,
-            'add_city_name_form': add_city_name_form,
-            'create_district_form': create_district_form,
             'add_user_to_district_form': add_user_to_district_form,
             'district_search_form': district_search_form,
             'districts': districts,
         })
 
+class AddUserToDistrictView(View):
+    def post(self, request):
+
+        add_user_to_district_form = AddUserToDistrictForm(request.POST)
+        if add_user_to_district_form.is_valid():
+            selected_districts = add_user_to_district_form.cleaned_data['selected_districts']
+            for district in selected_districts:
+                if not district.signed_user.filter(pk=request.user.pk).exists():
+                    district.signed_user.add(request.user)
+                    messages.success(request, 'User added successfully!')
+                else:
+                    messages.error(request, 'You already joined this district!')
+            return redirect('district')
+        messages.error(request, 'No data selected.')
+        return redirect('district')
+
+
 class AddDistrictView(View):
     def get(self, request):
-
         add_post_code_form = PostCodeForm()
         add_street_name_form = StreetNameForm()
         add_city_name_form = CityNameForm()
         create_district_form = DistrictForm()
         add_user_to_district_form = AddUserToDistrictForm()
-
         return render(request, 'add_district.html', {
-
             'add_post_code_form': add_post_code_form,
             'add_street_name_form': add_street_name_form,
             'add_city_name_form': add_city_name_form,
@@ -174,8 +156,6 @@ class CreateDistrictView(View):
     def post(self, request):
         create_district_form = DistrictForm(request.POST)
         if create_district_form.is_valid():
-
-
             create_district_form.save()
             messages.success(request, 'District created successfully!')
             return redirect('add_district')
