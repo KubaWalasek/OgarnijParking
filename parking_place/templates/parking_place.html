@@ -5,11 +5,14 @@
     <link rel="stylesheet" href="{% static 'css/add_place.css' %}">
 {% endblock %}
 {% block content %}
+
+
 <div class="form-hero">
 
 
 
-<form method="post" action="{% url 'add_parking_place' %}" autocomplete="off">
+<form method="post" action="{% url 'add_parking_place' pk %}" autocomplete="off">
+    <h3 class="place-title">Dodajesz miejsce parkingowe do osiedle: {{ district.district_name }}, {{ district.post_code }} {{ district.city_name }}</h3>
     {% csrf_token %}
     <div class="form-row no-arrow-select">
         {{ add_parking_place_form.place_number.label_tag }} {{ add_parking_place_form.place_number }}

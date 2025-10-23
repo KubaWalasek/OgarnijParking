@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 from accounts.forms import CreateUserForm, UpdateUserForm, AdresForm, DeleteUserForm, LoginForm, UpdatePasswordForm
 from accounts.models import Adres
-from parking_place.forms import DistrictNameForm, DistrictForm
+from parking_place.forms import DistrictForm, UserDistrictsForm
 from parking_place.models import District
 
 
@@ -84,16 +84,18 @@ class UserAccountView(LoginRequiredMixin, View):
         user = request.user
         update_user_form = UpdateUserForm(instance=user)
         district_form = DistrictForm()
-        add_district_name_form = DistrictNameForm()
+        districts = District.objects.filter(signed_user=user)
         adres, created = Adres.objects.get_or_create(user=user)
         adres_form = AdresForm(instance=adres)
+        user_districts_form = UserDistrictsForm(user=user)
+
         return render(request, 'account_form.html', {
             'form': update_user_form,
             'adres_form': adres_form,
             'url': 'user_account',
             'district_form': district_form,
-            'add_district_name_form': add_district_name_form,
-
+            'user_districts_form': user_districts_form,
+            'districts': districts,
         })
 
     def post(self, request):
@@ -103,24 +105,29 @@ class UserAccountView(LoginRequiredMixin, View):
         update_user_form = UpdateUserForm(request.POST, instance=user)
         adres_form = AdresForm(request.POST, instance=adres)
         add_user_to_district_form = DistrictForm(request.POST)
-        add_district_name_form = DistrictNameForm(request.POST)
+        user_districts_form = UserDistrictsForm(request.POST, user=user)
 
-        if update_user_form.is_valid() and adres_form.is_valid():
-            if not update_user_form.has_changed() and not adres_form.has_changed():
-                messages.success(request, 'No data updated !')
+        if 'add_parking' in request.POST:
+            if user_districts_form.is_valid():
+                district = user_districts_form.cleaned_data['district']
+                return redirect('add_parking_place', pk=district.pk)
+
+        elif 'submit_data' in request.POST:
+            if update_user_form.is_valid() and adres_form.is_valid():
+                if not update_user_form.has_changed() and not adres_form.has_changed():
+                    messages.success(request, 'No data updated !')
+                    return redirect('user_account')
+                update_user_form.save()
+                adres_form.save()
+                messages.success(request, 'Account updated successfully!')
                 return redirect('user_account')
-            update_user_form.save()
-            adres_form.save()
-            messages.success(request, 'Account updated successfully!')
-            return redirect('user_account')
-
 
         return render(request, 'account_form.html', {
             'update_user_form': update_user_form,
             'adres_form': adres_form,
             'url': 'user_account',
             'add_user_to_district_form': add_user_to_district_form,
-            'add_district_name_form': add_district_name_form,
+
         })
 
 

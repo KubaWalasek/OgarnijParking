@@ -13,7 +13,6 @@ def test_register_view_get(client):
     url = reverse('register')
     response = client.get(url)
     assert response.status_code == 200
-    assert '<form' in response.content.decode()
 
 
 

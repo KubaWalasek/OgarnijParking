@@ -61,32 +61,37 @@ class DistrictView(View):
             'districts': districts,
         })
 
-class AddOrRemoveUserFromDistrictView(View):
+class AddUserToDistrictView(View):
     def post(self, request):
-        action = request.POST.get('action')
         add_user_to_district_form = AddUserToDistrictForm(request.POST)
         if add_user_to_district_form.is_valid():
-            if action =='add':
-                selected_districts = add_user_to_district_form.cleaned_data['selected_districts']
-                for district in selected_districts:
-                    if not district.signed_user.filter(pk=request.user.pk).exists():
-                        district.signed_user.add(request.user)
-                        messages.success(request, 'User added successfully!')
-                    else:
-                        messages.error(request, 'You already joined this district!')
-                return redirect('district')
-            elif action == 'remove':
-                selected_districts = add_user_to_district_form.cleaned_data['selected_districts']
-                for district in selected_districts:
-                    if district.signed_user.filter(pk=request.user.pk).exists():
-                        district.signed_user.remove(request.user)
-                        messages.success(request, 'User removed successfully!')
-                    else:
-                        messages.error(request, 'You are not joined this district!')
-                return redirect('district')
-            else:
-                messages.error(request, 'No data selected.')
+            selected_districts = add_user_to_district_form.cleaned_data['selected_districts']
+            for district in selected_districts:
+                if not district.signed_user.filter(pk=request.user.pk).exists():
+                    district.signed_user.add(request.user)
+                    messages.success(request, 'User added successfully!')
+                else:
+                    messages.error(request, 'You already joined this district!')
+            return redirect('district')
+        else:
+            messages.error(request, 'No data selected.')
+            return redirect('district')
 
+class RemoveUserFromDistrictView(View):
+    def post(self, request):
+        add_user_to_district_form = AddUserToDistrictForm(request.POST)
+        if add_user_to_district_form.is_valid():
+            selected_districts = add_user_to_district_form.cleaned_data['selected_districts']
+            for district in selected_districts:
+                if district.signed_user.filter(pk=request.user.pk).exists():
+                    district.signed_user.remove(request.user)
+                    messages.success(request, 'User removed successfully!')
+                else:
+                    messages.error(request, 'You are not joined this district!')
+            return redirect('district')
+        else:
+            messages.error(request, 'No data selected.')
+            return redirect('district')
 
 
 class AddDistrictView(View):
@@ -170,15 +175,28 @@ class CreateDistrictView(View):
         return redirect('add_district')
 
 class AddParkingPlaceView(View):
+    def get(self, request, pk):
+        add_parking_place_form = ParkingPlaceDataForm()
+        district = District.objects.get(pk=pk)
+        return render(request, 'parking_place.html',{
+            'add_parking_place_form': add_parking_place_form,
+            'pk':pk,
+            'district':district,
+        })
 
-    def post(self, request):
+    def post(self, request, pk):
+        user = request.user
         add_parking_place_form = ParkingPlaceDataForm(request.POST)
+        district = District.objects.get(pk=pk)
         if add_parking_place_form.is_valid():
-            add_parking_place_form.save()
+            parking_place = add_parking_place_form.save(commit=False)
+            parking_place.owner = user
+            parking_place.district = district
+            parking_place.save()
             messages.success(request, 'Parking place added successfully!')
-            return redirect('parking_place')
+            return redirect('user_account')
         messages.error(request, 'Invalid parking place data!')
-        return redirect('parking_place')
+        return redirect('user_account')
 
 
 

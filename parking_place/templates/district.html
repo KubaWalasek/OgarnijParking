@@ -26,11 +26,11 @@
                 <div class="announcement-tile">
                     <div class="announcement-tile-main">
                         <div class="announcement-tile-title">
-                             <form method="post" action="{% url 'add_or_remove_user_from_district' %}">
+                             <form method="post">
                               {% csrf_token %}
                               {{ add_user_to_district_form.selected_districts }}
-                                 <button type="submit" name="action" value="add" class="big-form-btn">DOŁĄCZ</button>
-                                 <button type="submit" name="action" value="remove" class="big-form-btn">WYPISZ SIĘ</button>
+                                 <button type="submit" formaction="{% url "add_user_to_district" %}" class="big-form-btn">DOŁĄCZ</button>
+                                 <button type="submit" formaction="{% url "remove_user_from_district" %}" class="big-form-btn">WYPISZ SIĘ</button>
                             </form>
                         </div>
                     </div>

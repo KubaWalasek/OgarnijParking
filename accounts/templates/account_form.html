@@ -7,8 +7,12 @@
 {% endblock %}
 
 {% block content %}
+    <div class="account-layout">
+    <div class="main-form-area">
     <div class="form-hero">
         <div class="form-card">
+
+
             <form method="POST" autocomplete="off" class="form">
                 {% csrf_token %}
 
@@ -18,7 +22,7 @@
                     {% elif url == 'login' %}
                         Zaloguj się
                     {% elif url == 'user_account' %}
-                        Edytuj swoje konto
+                        Twoje konto
                     {% else %}
                         Formularz
                     {% endif %}
@@ -72,15 +76,15 @@
                                             <div class="form-error">{{ error }}</div>
                                         {% endfor %}
                                     </div>
-                                {% endif %}
 
-                                <div class="form-row">
-                                    {{ form.last_name.label_tag }}
-                                    {{ form.last_name }}
-                                    {% for error in form.last_name.errors %}
-                                        <div class="form-error">{{ error }}</div>
-                                    {% endfor %}
-                                </div>
+                                    <div class="form-row">
+                                        {{ form.last_name.label_tag }}
+                                        {{ form.last_name }}
+                                        {% for error in form.last_name.errors %}
+                                            <div class="form-error">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
 
                                 {% if url == 'register' %}
                                     <div class="form-sections-row">
@@ -104,7 +108,6 @@
                         </section>
 
                         {% if url == 'user_account' %}
-
                             <section class="form-section">
                                 <h3>Adres</h3>
 
@@ -162,7 +165,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="big-form-btn">
+                <button type="submit" name="submit_data" class="big-form-btn">
                     {% if url == 'register' %}
                         UTWÓRZ KONTO
                     {% elif url == 'login' %}
@@ -181,11 +184,46 @@
                     </div>
                 {% endif %}
             </form>
-        </div>
-        {% if url == 'user_account' %}
-            <aside class="aside">
-                {% include 'district_list.html' %}
+           </div>
+    </div>
+    </div>
+            <aside class="sidebar-actions">
+
+            {% if url == 'user_account' %}
+                <div class="districts-container">
+                <section class="form-section">
+                    <div class="add-district-frame">
+                        <form method="POST" autocomplete="off" class="form">
+                            {% csrf_token %}
+                            <div class="form-row" >
+                                <h3>Moje osiedla</h3>
+                                {{ user_districts_form }}
+                            </div>
+                            <button type="submit" name="add_parking" class="frame-image-link" aria-label="Dodaj parking"
+                                    style="cursor: pointer; border: none; margin-left:80px">
+                                <img src="{% static 'images/add_parking.webp' %}" alt="Dodaj parking" title="Dodaj parking" class="frame-img">
+                            </button>
+                            <div>
+                                <span class="frame-title" style="margin-left:40px">DODAJ PARKING</span>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+
+                <section class="form-section">
+                    <div class="add-district-frame">
+                        <a href="{% url 'district' %}" class="frame-image-link" aria-label="Dołącz do osiedla">
+                            <img src="{% static 'images/district.png' %}" alt="Dołącz do osiedla" title="Dołącz do osiedla" class="frame-img">
+                        </a>
+                        <div>
+                            <span class="frame-title" >DOŁĄCZ DO OSIEDLA</span>
+                        </div>
+                    </div>
+                </section>
+                </div>
+            {% endif %}
             </aside>
-        {% endif %}
+
     </div>
 {% endblock %}

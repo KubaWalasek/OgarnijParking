@@ -52,6 +52,27 @@ class AddUserToDistrictForm(forms.Form):
            required=True
        )
 
+class UserDistrictsForm(forms.Form):
+    district = forms.ModelChoiceField(
+        queryset=District.objects.all(),
+        label= '',
+        widget=forms.Select(),
+        required=True
+        )
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if user is not None:
+            district_qs = District.objects.filter(signed_user=user)
+            self.fields['district'].queryset = district_qs
+            if district_qs.exists():
+                self.fields['district'].empty_label = '-wybierz osiedle-'
+            else :
+                self.fields['district'].empty_label = '-brak zapisanych osiedli-'
+
+
+
+
 
 class DistrictSearchForm(forms.Form):
     district_name = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'placeholder': 'Osiedle'}), required=False)
