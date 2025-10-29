@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block links %}
+     {{ block.super }}
+            <style>
+                body {
+                    background: url("{% static 'images/home_background.avif' %}") no-repeat center center fixed;
+                    background-size: cover;
+                }
+            </style>
+{% endblock %}
+{% block content %}{% endblock %}

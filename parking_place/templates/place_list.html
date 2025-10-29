@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block links %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/list.css' %}">
+
+{% endblock %}
+
+{% block content %}
+        <div class="form-hero">
+            <div class="form-card" style="max-width: 2000px;">
+                <h2 class="form-title center-title">Lista osiedli</h2>
+                    <div class="announcement-grid">
+                        {% if districts %}
+                            {% for district in districts %}
+                                <a href="{% url 'place_validity_list' district.pk %}" class="announcement-link">
+                                    <div class="announcement-tile">
+                                        <div class="announcement-tile-main">
+                                            <div class="announcement-tile-title">
+                                                {{ district.post_code }} {{ district.city_name }} - Osiedle {{ district.district_name }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                        {% endfor %}
+                    {% else %}
+                        <p>Brak dostępnych miejsc parkingowych.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+{% endblock %}

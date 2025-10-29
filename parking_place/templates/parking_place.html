@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block links %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/add_place.css' %}">
+{% endblock %}
+{% block content %}
+
+
+<div class="form-hero">
+
+
+
+<form method="post" action="{% url 'add_parking_place' pk %}" autocomplete="off">
+    <h3 class="place-title">Dodajesz miejsce parkingowe do osiedla: {{ district.district_name }}, {{ district.post_code }} {{ district.city_name }}</h3>
+    {% csrf_token %}
+    <div class="form-row no-arrow-select">
+        {{ add_parking_place_form.place_number.label_tag }} {{ add_parking_place_form.place_number }}
+        {% for e in district_name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="form-row no-arrow-select">
+        {{ add_parking_place_form.description.label_tag }} {{ add_parking_place_form.description }}
+        {% for e in district_name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+    </div>
+    <button type="submit" class="big-form-btn">Dodaj miejsce parkingowe</button>
+</form>
+</div>
+{% endblock %}

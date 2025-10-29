@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block links %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/list.css' %}">
+
+{% endblock %}
+
+{% block content %}
+    <div class="form-hero">
+        <div class="form-card">
+            <h2 class="form-title center-title">Lista ogłoszeń</h2>
+            {% if announcements %}
+                <div class="announcement-grid">
+                    {% for announcement in announcements %}
+                        <a href="{% url 'announcement_detail' announcement.pk %}" class="announcement-link">
+                            <div class="announcement-tile">
+                                <div class="announcement-tile-main">
+                                    <div class="announcement-tile-title">
+                                        {{ announcement.title }}
+                                    </div>
+                                    <div class="announcement-tile-content">
+                                        {{ announcement.content|linebreaksbr }}
+                                    </div>
+                                    <div class="announcement-tile-footer">
+                                        Dodano: {{ announcement.createdate|date:"Y-m-d H:i" }},
+                                        Autor: {{ announcement.author.email }}
+                                    </div>
+                                </div>
+                                <div class="announcement-tile-aside">
+                                    <span class="announcement-category">{{ announcement.category }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="form-row">Brak ogłoszeń do wyświetlenia.</div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

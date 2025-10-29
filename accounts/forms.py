@@ -1,103 +1,54 @@
+from django.contrib.auth import get_user_model
+from django import forms as dj_forms
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm, PasswordChangeForm
 from django import forms
-from django.contrib.auth.models import User
 
-######################################################################################################
+from accounts.models import Adres
 
-class RegisterUserForm(forms.ModelForm):
-    required_css_class = 'required'
-    username = forms.CharField(required=True)
-    password_1 = forms.CharField(label='Password', widget=forms.PasswordInput, required=True)
-    password_2 = forms.CharField(label='Repeat Password', widget=forms.PasswordInput, required=True)
-    email = forms.EmailField(required=True)
-    first_name = forms.CharField(max_length=20, required=False)
-    last_name = forms.CharField(max_length=20, required=False)
-    post_code = forms.CharField(max_length=10, required=False)
-    city = forms.CharField(max_length=30, required=False)
-    street = forms.CharField(max_length=30, required=False)
-    street_number = forms.CharField(max_length=10, required=False)
-    door_number = forms.CharField(max_length=10, required=False)
-    phone_number = forms.CharField(max_length=15, required=False)
+User = get_user_model()
 
 
-
-
-
-    def clean_password_1(self):
-        password_1 = self.cleaned_data.get('password_1')
-        if password_1 is None:
-            return
-        if len(password_1) < 8:
-            raise forms.ValidationError('Password must be at least 8 characters long.')
-        if not any(c.isupper() for c in password_1):
-            raise forms.ValidationError('Password must contain at least one uppercase letter.')
-        return password_1
-
-    def clean(self):
-        cleaned_data = super().clean()
-        password_1 = cleaned_data.get('password_1')
-        password_2 = cleaned_data.get('password_2')
-
-        # jeśli password_1 ma błędy - nie porównuj
-        if password_1 and password_2 and password_1 != password_2:
-            raise forms.ValidationError('Passwords do not match !')
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if email and User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError('Użytkownik z tym adresem e-mail już istnieje')
-        return email
-
+class CreateUserForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ['username', 'email']
-
-######################################################################################################
-
-class LoginUserForm(forms.Form):
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-
-############################################################################################################
+        fields = ['email']
 
 
-class UpdateUserForm(forms.ModelForm):
-    password_1 = forms.CharField(label='Password', widget=forms.PasswordInput, required=False)
-    password_2 = forms.CharField(label='Repeat Password', widget=forms.PasswordInput, required=False)
-    email = forms.EmailField(required=True, error_messages={'required': 'Email is required'})
-    first_name = forms.CharField(max_length=20, required=False )
-    last_name = forms.CharField(max_length=20,required=False )
-    post_code = forms.CharField(max_length=10, required=False )
-    city = forms.CharField(max_length=30, required=False)
-    street = forms.CharField(max_length=30, required=False)
-    street_number = forms.CharField(max_length=10, required=False)
-    door_number = forms.CharField(max_length=10, required=False)
-    phone_number = forms.CharField(max_length=15, required=False)
-
-
-
-# Python
-    def clean(self):
-        cleaned_data = super().clean()
-        password_1 = cleaned_data.get('password_1')
-        password_2 = cleaned_data.get('password_2')
-
-        # brak zmiany hasła
-        if not password_1 and not password_2:
-            return cleaned_data
-
-        # podano tylko jedno pole
-        if (password_1 and not password_2) or (password_2 and not password_1):
-            raise forms.ValidationError('Provide both password fields.')
-
-        # pełna walidacja przy zmianie
-        if password_1 != password_2:
-            raise forms.ValidationError('Passwords do not match !')
-        if len(password_1) < 8:
-            raise forms.ValidationError('Password must be at least 8 characters long.')
-        if not any(c.isupper() for c in password_1):
-            raise forms.ValidationError('Password must contain at least one uppercase letter.')
-        return cleaned_data
-
+class UpdateUserForm(UserChangeForm):
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['email', 'first_name', 'last_name']
+
+class UpdatePasswordForm(PasswordChangeForm):
+    class Meta:
+        model = User
+        fields = ['old_password', 'new_password1', 'new_password2']
+
+class LoginForm(AuthenticationForm):
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+
+class AdresForm(forms.ModelForm):
+    class Meta:
+        model = Adres
+        fields = ['post_code', 'city', 'street', 'house_number', 'apartment_number', 'phone_number']
+
+
+class DeleteUserForm(forms.Form):
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_password(self):
+        pwd = self.cleaned_data['password']
+        if not self.user or not self.user.check_password(pwd):
+            raise forms.ValidationError('Nieprawidłowe hasło.')
+        return pwd
+
+
+
+
+

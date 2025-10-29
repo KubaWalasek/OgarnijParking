@@ -1,82 +1,74 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.views import View
-from accounts.forms import RegisterUserForm, LoginUserForm, UpdateUserForm
-from accounts.models import UserProfile
+from accounts.forms import CreateUserForm, UpdateUserForm, AdresForm, DeleteUserForm, LoginForm, UpdatePasswordForm
+from accounts.models import Adres
+from parking_place.forms import DistrictForm, UserDistrictsForm
+from parking_place.models import District
 
 
 ######################################################################################################
+
+def home(request):
+    return render(request, 'home_base.html')
+
+
 class RegisterView(View):
     def get(self, request):
-        form = RegisterUserForm()
+        form = CreateUserForm()
         return render(request, 'account_form.html', {
             'form': form,
             'url': 'register'
         })
 
     def post(self, request):
-        form = RegisterUserForm(request.POST)
+        form = CreateUserForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password_1'])
-            user.save()
-            UserProfile.objects.create(user=user,
-                                       first_name=form.cleaned_data['first_name'],
-                                       last_name=form.cleaned_data['last_name'],
-                                       post_code=form.cleaned_data['post_code'],
-                                       city=form.cleaned_data['city'],
-                                       street=form.cleaned_data['street'],
-                                       street_number=form.cleaned_data['street_number'],
-                                       door_number=form.cleaned_data['door_number'],
-                                       phone_number=form.cleaned_data['phone_number'],
-
-                                       )
+            form.save()
             messages.success(request, 'Account created successfully!')
             return redirect('user_account')
         return render(request, 'account_form.html', {
             'form': form,
             'url': 'register',
-
         })
 
 ######################################################################################################
 class LoginView(View):
+    def _login_set(self, request):
+        if request.user.is_authenticated:
+            messages.info(request, 'You are already logged in!')
+            return redirect('user_account')
+
+        if request.method == 'GET':
+            form = LoginForm()
+            return render(request, 'account_form.html', {
+                'form': form,
+                'url': 'login'
+            })
+
+        if request.method == 'POST':
+            form = LoginForm(request, data=request.POST)
+            if form.is_valid():
+                user = form.get_user()
+                login(request, user)
+                messages.success(request, 'You are logged in!')
+                return redirect('user_account')
+            messages.error(request, 'Invalid username or password!')
+            return render(request, 'account_form.html', {
+                'form': form,
+                'url': 'login'
+            })
+
     def get(self, request):
-        form = LoginUserForm()
-        return render(request, 'account_form.html', {
-            'form': form,
-            'url': 'login'
-        })
+        return self._login_set(request)
 
     def post(self, request):
-        form = LoginUserForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
-            if request.user.is_authenticated and request.user.username == username and user is not None :
-                return render(request, 'account_form.html', {
-                    'form': form,
-                    'message': 'You are already logged in !',
-                    'url': 'login'
-                })
+        return self._login_set(request)
 
-            if user is not None:
-                login(request, user)
-                next_url = request.GET.get('next', 'user_account')
-                return redirect(next_url)
-            else:
-                messages.error(request, 'Invalid username or password !')
-                return render(request, 'account_form.html', {
-                    'form': form,
-                    'url': 'login'
-                })
-        return render(request, 'account_form.html', {
-            'form': form,
-            'url': 'login'
-        })
+
+
 
 ######################################################################################################
 class LogoutView(View):
@@ -88,73 +80,84 @@ class LogoutView(View):
 ######################################################################################################
 class UserAccountView(LoginRequiredMixin, View):
     def get(self, request):
-        user = request.user
-        profile, created = UserProfile.objects.get_or_create(user=user)
-        initial_data = {
-            'username': user.username,
-            'email': user.email,
-            'first_name': profile.first_name,
-            'last_name': profile.last_name,
-            'post_code': profile.post_code,
-            'city': profile.city,
-            'street': profile.street,
-            'street_number': profile.street_number,
-            'door_number': profile.door_number,
-            'phone_number': profile.phone_number,
-        }
-        form = UpdateUserForm(initial=initial_data)
 
-        form.fields['password_1'].required = False
-        form.fields['password_2'].required = False
-        form.fields['email'].required = False
+        user = request.user
+        update_user_form = UpdateUserForm(instance=user)
+        district_form = DistrictForm()
+        districts = District.objects.filter(signed_user=user)
+        adres, created = Adres.objects.get_or_create(user=user)
+        adres_form = AdresForm(instance=adres)
+        user_districts_form = UserDistrictsForm(user=user)
+
         return render(request, 'account_form.html', {
-            'form': form,
-            'url': 'user_account'
+            'form': update_user_form,
+            'adres_form': adres_form,
+            'url': 'user_account',
+            'district_form': district_form,
+            'user_districts_form': user_districts_form,
+            'districts': districts,
         })
 
     def post(self, request):
+
         user = request.user
-        profile, created = UserProfile.objects.get_or_create(user=request.user)
-        form = UpdateUserForm(request.POST, instance=user)
-        if form.is_valid():
-            user = form.save(commit=False)
+        adres, _ = Adres.objects.get_or_create(user=user)
+        update_user_form = UpdateUserForm(request.POST, instance=user)
+        adres_form = AdresForm(request.POST, instance=adres)
+        add_user_to_district_form = DistrictForm(request.POST)
+        user_districts_form = UserDistrictsForm(request.POST, user=user)
 
-            # brak zmian w polach modelu i brak prób zmiany hasła
-            if not form.changed_data and not (
-                    form.cleaned_data.get('password_1') or form.cleaned_data.get('password_2')
-            ):
-                messages.info(request, 'No data updated')
-                return render(request, 'account_form.html', {
-                    'form': form,
-                    'url': 'user_account'
-                })
+        if 'add_parking' in request.POST:
+            if user_districts_form.is_valid():
+                district = user_districts_form.cleaned_data['district']
+                return redirect('add_parking_place', pk=district.pk)
 
-            # zmiana hasła tylko gdy oba pola wypełnione (spójne i zwalidowane przez form)
-            if form.cleaned_data.get('password_1') and form.cleaned_data.get('password_2'):
-                user.set_password(form.cleaned_data['password_1'])
+        elif 'submit_data' in request.POST:
+            if update_user_form.is_valid() and adres_form.is_valid():
+                if not update_user_form.has_changed() and not adres_form.has_changed():
+                    messages.success(request, 'No data updated !')
+                    return redirect('user_account')
+                update_user_form.save()
+                adres_form.save()
+                messages.success(request, 'Account updated successfully!')
+                return redirect('user_account')
 
-            # zapisz użytkownika (np. zmiana email)
-            user.save()
-
-            # aktualizacje profilu (nie są częścią modelu User)
-            profile.first_name = form.cleaned_data.get('first_name')
-            profile.last_name = form.cleaned_data.get('last_name')
-            profile.post_code = form.cleaned_data.get('post_code')
-            profile.city = form.cleaned_data.get('city')
-            profile.street = form.cleaned_data.get('street')
-            profile.street_number = form.cleaned_data.get('street_number')
-            profile.door_number = form.cleaned_data.get('door_number')
-            profile.phone_number = form.cleaned_data.get('phone_number')
-            profile.save()
-
-            # utrzymanie sesji po zmianie hasła
-            update_session_auth_hash(request, user)
-            messages.success(request, 'Account updated successfully!')
-            return redirect('user_account')
-
-        # tu trafisz tylko przy błędach walidacji
-        messages.error(request, 'Invalid data!')
         return render(request, 'account_form.html', {
+            'update_user_form': update_user_form,
+            'adres_form': adres_form,
+            'url': 'user_account',
+            'add_user_to_district_form': add_user_to_district_form,
+
+        })
+
+
+class UpdatePasswordView(LoginRequiredMixin, View):
+    def get(self, request):
+        form = UpdatePasswordForm(request.user)
+        return render(request, 'update_password.html', {'form': form})
+
+    def post(self, request):
+        form = UpdatePasswordForm(request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, request.user)
+            messages.success(request, 'Password updated successfully!')
+            return redirect('user_account')
+        return render(request, 'update_password.html', {'form': form})
+
+class DeleteAccountView(LoginRequiredMixin, View):
+    def get(self, request):
+        form = DeleteUserForm(user=request.user)
+        return render(request, 'delete_account.html', {
             'form': form,
-            'url': 'user_account'
+        })
+
+    def post(self, request):
+        form = DeleteUserForm(request.POST, user=request.user)
+        if form.is_valid():
+            request.user.delete()
+            messages.success(request, 'Account deleted successfully!')
+            return redirect('login')
+        return render(request, 'delete_account.html', {
+            'form': form,
         })

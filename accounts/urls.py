@@ -3,10 +3,13 @@ from accounts import views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('user_account/', views.UserAccountView.as_view(), name='user_account'),
+    path('delete_account/', views.DeleteAccountView.as_view(), name='delete_account'),
+    path('update_password/', views.UpdatePasswordView.as_view(), name='update_password'),
     path("password_reset/", auth_views.PasswordResetView.as_view(
         template_name="password_reset_form.html",
         email_template_name="password_reset_email.html",

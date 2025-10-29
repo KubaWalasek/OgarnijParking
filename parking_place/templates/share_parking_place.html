@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block links %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/add_place.css' %}">
+{% endblock %}
+{% block content %}
+
+
+<div class="form-hero">
+
+<form method="post" action="{% url 'share_parking_place' pk %}" autocomplete="off">
+    <h3 class="place-title">Udostępniasz miejsce parkingowe nr: {{ place }}</h3>
+    {% csrf_token %}
+    <div class="form-row no-arrow-select">
+        {{ share_parking_place_form.available_from.label_tag }} {{ share_parking_place_form.available_from }}
+        {% for e in district_name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="form-row no-arrow-select">
+        {{ share_parking_place_form.available_until.label_tag }} {{ share_parking_place_form.available_until }}
+        {% for e in district_name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+    </div>
+    <button type="submit" class="big-form-btn">Udostępnij miejsce parkingowe</button>
+</form>
+</div>
+{% endblock %}

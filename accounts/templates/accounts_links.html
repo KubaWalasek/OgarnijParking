@@ -1,18 +1,46 @@
 {% load static %}
+
 <div class="accounts-links">
+
+{#    <a href="{% url 'add_place' %}" class="accounts-link" aria-label="Dodaj miejsce">#}
+{#        <img src="{% static 'images/add_place.png' %}" alt="Dodaj miejsce" title="Dodaj miejsce">#}
+{#    </a>#}
+
+    <a href="{% url 'create_invitation' %}" class="accounts-link" aria-label="Zaproszenie">
+        <img src="{% static 'images/invitation.png' %}" alt="Zaproszenie" title="Zaproszenie">
+    </a>
+
+    <a href="{% url 'announcement_list' %}" class="accounts-link" aria-label="announcement_list">
+            <img src="{% static 'images/list.jpg' %}" alt="add" title="announcement_list">
+        </a>
+
+    <a href="{% url 'add_announcement' %}" class="accounts-link" aria-label="add_announcement">
+            <img src="{% static 'images/add.jpeg' %}" alt="add" title="add_announcement">
+        </a>
+
+    <a href="{% url 'home' %}" class="accounts-link" aria-label="home">
+            <img src="{% static 'images/home.jpeg' %}" alt="home" title="home">
+        </a>
+
     <a href="{% url 'login' %}" class="accounts-link" aria-label="Zaloguj">
         <img src="{% static 'images/login.jpeg' %}" alt="login" title="LOGIN">
     </a>
+
     <a href="{% url 'register' %}" class="accounts-link" aria-label="Rejestracja">
         <img src="{% static 'images/register.jpeg' %}" alt="register" title="REGISTER">
     </a>
+
     <a href="{% url 'logout' %}" class="accounts-link" aria-label="Wyloguj">
         <img src="{% static 'images/logout.jpeg' %}" alt="logout" title="LOGOUT">
     </a>
+
     <a href="{% url 'user_account' %}" class="accounts-link" aria-label="Konto użytkownika">
         <img src="{% static 'images/user.jpeg' %}" alt="user_account" {% if user.is_authenticated %}title="{{ user.username }}"{% else %}title="Niezalogowany"{% endif %}>
     </a>
-     <a href="{% url 'password_reset' %}" class="accounts-link" aria-label="Reset hasła">
+
+    <a href="{% url 'password_reset' %}" class="accounts-link" aria-label="Reset hasła">
         <img src="{% static 'images/reset.jpeg' %}" alt="Reset hasła" title="Reset hasła">
     </a>
+
+
 </div>
