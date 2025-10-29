@@ -1,5 +1,5 @@
 from django import forms
-from .models import District,  ParkingPlaceData, PostCode, StreetName, CityName
+from .models import District, ParkingPlace, PostCode, StreetName, CityName, ValidityPeriod
 
 
 class PostCodeForm(forms.ModelForm):
@@ -40,10 +40,19 @@ class DistrictForm(forms.ModelForm):
         self.fields['street_name'].empty_label = '— brak ulicy —'
 
 
-class ParkingPlaceDataForm(forms.ModelForm):
+class ParkingPlaceForm(forms.ModelForm):
     class Meta:
-        model = ParkingPlaceData
-        fields = ('place_number', 'available_from', 'available_until', 'description')
+        model = ParkingPlace
+        fields = ('place_number', 'description')
+
+class ShareParkingPlaceForm(forms.ModelForm):
+    class Meta:
+        model = ValidityPeriod
+        fields = ('available_from', 'available_until')
+        widgets = {
+            'available_from': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'available_until': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        }
 
 class AddUserToDistrictForm(forms.Form):
        selected_districts = forms.ModelMultipleChoiceField(
@@ -56,7 +65,7 @@ class UserDistrictsForm(forms.Form):
     district = forms.ModelChoiceField(
         queryset=District.objects.all(),
         label= '',
-        widget=forms.Select(),
+        widget=forms.RadioSelect(),
         required=True
         )
     def __init__(self, *args, user=None, **kwargs):
@@ -65,12 +74,25 @@ class UserDistrictsForm(forms.Form):
         if user is not None:
             district_qs = District.objects.filter(signed_user=user)
             self.fields['district'].queryset = district_qs
-            if district_qs.exists():
-                self.fields['district'].empty_label = '-wybierz osiedle-'
-            else :
-                self.fields['district'].empty_label = '-brak zapisanych osiedli-'
+            if not district_qs.exists():
+                self.fields['district'].empty_label = '-brak zapisanych osiedli - dołącz do osiedla aby móc dodać miejsce parkingowe-'
 
 
+class UserParkingPlacesForm(forms.Form):
+    place = forms.ModelChoiceField(
+        queryset=ParkingPlace.objects.all(),
+        label= '',
+        widget=forms.RadioSelect(),
+        required=True
+        )
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if user is not None:
+            place_qs = ParkingPlace.objects.filter(owner=user)
+            self.fields['place'].queryset = place_qs
+            if not place_qs.exists():
+                self.fields['place'].empty_label = '-brak zapisanych miejsc - dodaj miejsce parkingowe, aby móc je udostępnić-'
 
 
 

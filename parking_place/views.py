@@ -3,23 +3,85 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.views import View
 from parking_place.forms import DistrictForm, PostCodeForm, StreetNameForm, CityNameForm, \
-    ParkingPlaceDataForm, AddUserToDistrictForm, DistrictSearchForm
-from parking_place.models import District, PostCode, CityName, StreetName
+    ParkingPlaceForm, AddUserToDistrictForm, DistrictSearchForm, UserDistrictsForm, ShareParkingPlaceForm, \
+    UserParkingPlacesForm
+from parking_place.models import District, PostCode, CityName, StreetName, ParkingPlace, ValidityPeriod
 
 
-# Create your views here.
 def map_view(request):
     return render(request, 'map_view.html')
+
+class MyPlaceView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        user = request.user
+        districts = District.objects.filter(signed_user=user)
+        places = ParkingPlace.objects.filter(owner=user)
+        user_districts_form = UserDistrictsForm(user=user)
+        user_parking_places_form = UserParkingPlacesForm(user=user)
+
+        return render(request, 'my_places.html', {
+            'url': 'user_account',
+            'districts': districts,
+            'user_districts_form': user_districts_form,
+            'user_parking_places_form': user_parking_places_form,
+            'places': places,
+        })
+
+    def post(self, request, pk):
+        user = request.user
+        add_user_to_district_form = DistrictForm(request.POST)
+        user_districts_form = UserDistrictsForm(request.POST, user=user)
+        user_parking_places_form = UserParkingPlacesForm(request.POST, user=user)
+
+        if 'add_parking' in request.POST:
+            if not District.objects.filter(signed_user=user).exists():
+                messages.error(request, 'Dołącz do osiedla aby móc dodać miejsce parkingowe!')
+                return redirect('my_place', pk=user.pk)
+            if user_districts_form.is_valid():
+                district = user_districts_form.cleaned_data['district']
+                return redirect('add_parking_place', pk=district.pk)
+
+        elif 'share_parking' in request.POST:
+            if not ParkingPlace.objects.filter(owner=user).exists():
+                messages.error(request, 'Musisz najpierw dodać miejsce parkingowe!')
+                return redirect('my_place', pk=user.pk)
+            if user_parking_places_form.is_valid():
+                place = user_parking_places_form.cleaned_data['place']
+                return redirect('share_parking_place', pk=place.pk)
+        return render(request, 'account_form.html', {
+            'add_user_to_district_form': add_user_to_district_form,
+        })
 
 
 class PlaceListView(View):
     def get(self, request):
-        places = District.objects.all()
-        url = 'place_list'
-        return render(request, 'account_form.html', {
-            'places': places,
-            'url': url
+        districts = District.objects.all()
+        return render(request, 'place_list.html', {
+            'districts': districts,
         })
+
+
+class PlaceValidityView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        district = District.objects.get(pk=pk)
+        validities = (ValidityPeriod.objects.filter(
+            parking_place__district=district,is_reserved=False)
+                      .select_related('parking_place'))
+        return render(request, 'place_validity_list.html', {
+            'district': district,
+            'validities': validities,
+        })
+
+    def post(self, request, pk):
+
+        if 'reserve' in request.POST:
+            validity_id = request.POST.get('reserve')
+            validity = ValidityPeriod.objects.get(pk=validity_id)
+            validity.is_reserved = True
+
+            validity.save()
+            messages.success(request, 'Place reserved successfully!')
+            return redirect('my_place', pk=request.user.pk)
 
 
 class AddUserToDistrictPkView(View):
@@ -33,7 +95,7 @@ class AddUserToDistrictPkView(View):
         return redirect('district')
 
 
-class DistrictView(View):
+class DistrictView(LoginRequiredMixin, View):
     def get(self, request):
         add_user_to_district_form = AddUserToDistrictForm()
         district_search_form = DistrictSearchForm(request.GET or None)
@@ -61,7 +123,7 @@ class DistrictView(View):
             'districts': districts,
         })
 
-class AddUserToDistrictView(View):
+class AddUserToDistrictView(LoginRequiredMixin, View):
     def post(self, request):
         add_user_to_district_form = AddUserToDistrictForm(request.POST)
         if add_user_to_district_form.is_valid():
@@ -77,7 +139,7 @@ class AddUserToDistrictView(View):
             messages.error(request, 'No data selected.')
             return redirect('district')
 
-class RemoveUserFromDistrictView(View):
+class RemoveUserFromDistrictView(LoginRequiredMixin, View):
     def post(self, request):
         add_user_to_district_form = AddUserToDistrictForm(request.POST)
         if add_user_to_district_form.is_valid():
@@ -94,7 +156,7 @@ class RemoveUserFromDistrictView(View):
             return redirect('district')
 
 
-class AddDistrictView(View):
+class AddDistrictView(LoginRequiredMixin, View):
     def get(self, request):
         add_post_code_form = PostCodeForm()
         add_street_name_form = StreetNameForm()
@@ -109,16 +171,7 @@ class AddDistrictView(View):
         })
 
 
-class ParkingPlaceView(View):
-    def get(self, request):
-        add_parking_place_form = ParkingPlaceDataForm()
-        return render(request, 'parking_place.html', {
-            'add_parking_place_form': add_parking_place_form,
-        })
-
-
-
-class AddPostCodeView(View):
+class AddPostCodeView(LoginRequiredMixin, View):
 
     def post(self, request):
         add_post_code_form = PostCodeForm(request.POST)
@@ -133,7 +186,7 @@ class AddPostCodeView(View):
         messages.error(request, 'Invalid post code!')
         return redirect('add_district')
 
-class AddStreetNameView(View):
+class AddStreetNameView(LoginRequiredMixin, View):
 
     def post(self, request):
         add_street_name_form = StreetNameForm(request.POST)
@@ -149,7 +202,7 @@ class AddStreetNameView(View):
         return redirect('add_district')
 
 
-class AddCityNameView(View):
+class AddCityNameView(LoginRequiredMixin, View):
 
     def post(self, request):
         add_city_name_form = CityNameForm(request.POST)
@@ -163,8 +216,7 @@ class AddCityNameView(View):
             return redirect('add_district')
         return redirect('add_district')
 
-class CreateDistrictView(View):
-
+class CreateDistrictView(LoginRequiredMixin, View):
     def post(self, request):
         create_district_form = DistrictForm(request.POST)
         if create_district_form.is_valid():
@@ -174,9 +226,9 @@ class CreateDistrictView(View):
         messages.error(request, 'Invalid district data!')
         return redirect('add_district')
 
-class AddParkingPlaceView(View):
+class AddParkingPlaceView(LoginRequiredMixin, View):
     def get(self, request, pk):
-        add_parking_place_form = ParkingPlaceDataForm()
+        add_parking_place_form = ParkingPlaceForm()
         district = District.objects.get(pk=pk)
         return render(request, 'parking_place.html',{
             'add_parking_place_form': add_parking_place_form,
@@ -186,7 +238,7 @@ class AddParkingPlaceView(View):
 
     def post(self, request, pk):
         user = request.user
-        add_parking_place_form = ParkingPlaceDataForm(request.POST)
+        add_parking_place_form = ParkingPlaceForm(request.POST)
         district = District.objects.get(pk=pk)
         if add_parking_place_form.is_valid():
             parking_place = add_parking_place_form.save(commit=False)
@@ -194,12 +246,32 @@ class AddParkingPlaceView(View):
             parking_place.district = district
             parking_place.save()
             messages.success(request, 'Parking place added successfully!')
-            return redirect('user_account')
+            return redirect('my_place', pk=user.pk)
         messages.error(request, 'Invalid parking place data!')
-        return redirect('user_account')
+        return redirect('my_place', pk=user.pk)
 
 
+class ShareParkingPlaceView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        share_parking_place_form = ShareParkingPlaceForm()
+        place = ParkingPlace.objects.get(pk=pk)
+        return render(request, 'share_parking_place.html',{
+            'share_parking_place_form': share_parking_place_form,
+            'pk':pk,
+            'place':place,
+        })
 
+    def post(self, request, pk):
+        share_parking_place_form = ShareParkingPlaceForm(request.POST)
+        place = ParkingPlace.objects.get(pk=pk)
+        if share_parking_place_form.is_valid():
+            shared_parking_place = share_parking_place_form.save(commit=False)
+            shared_parking_place.parking_place = place
+            shared_parking_place.save()
+            messages.success(request, 'Parking place shared successfully!')
+            return redirect('my_place', pk=request.user.pk)
+        messages.error(request, 'Invalid parking place data!')
+        return redirect('my_place', pk=request.user.pk)
 
 
 

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block links %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/add_place.css' %}">
+    <link rel="stylesheet" href="{% static 'css/account_links.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    {% for error in form.non_field_errors %}
+        <div class="form-error">{{ error }}</div>
+    {% endfor %}
+
+    {% if messages %}
+        {% for m in messages %}
+            <div class="form-error">{{ m }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="page-container">
+        {% if url == 'user_account' %}
+            <div class="main-content">
+                <!-- Lewa strona - formularze -->
+                <div class="forms-section">
+
+                    <div class="form-box">
+                        <form method="POST" autocomplete="off">
+                            {% csrf_token %}
+                            <h2 class="form-box-title">WYBIERZ MIEJSCE KTÓRE CHCESZ UDOSTĘPNIĆ </h2>
+                            <div class="form-content">
+                                {{ user_parking_places_form }}
+                            </div>
+                            <button type="submit" name="share_parking" class="form-action-btn">
+                                <img src="{% static 'images/share.png' %}" alt="Udostępnij" class="btn-icon">
+                                <span class="btn-text">UDOSTĘPNIJ WYBRANE MIEJSCE</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="form-box">
+                        <form method="POST" autocomplete="off">
+                            {% csrf_token %}
+                            <h2 class="form-box-title">WYBIERZ OSIEDLE ABY DODAĆ MIEJSCE PARKINGOWE</h2>
+                            <div class="form-content">
+                                {{ user_districts_form }}
+                            </div>
+                            <button type="submit" name="add_parking" class="form-action-btn">
+                                <img src="{% static 'images/add_parking.webp' %}" alt="Dodaj parking" class="btn-icon">
+                                <span class="btn-text">DODAJ MIEJSCE PARKINGOWE DO WYBRANEGO OSIEDLA</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="district-link-box">
+                        <span class="district-text">TUTAJ MOŻESZ DOŁĄCZYĆ DO OSIEDLA</span>
+                        <a href="{% url 'district' %}" class="district-link">
+                            <img src="{% static 'images/district.png' %}" alt="Dołącz do osiedla" class="district-icon">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

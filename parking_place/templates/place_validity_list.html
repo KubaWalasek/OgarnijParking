@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block links %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/account_form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/list.css' %}">
+
+{% endblock %}
+
+{% block content %}
+    <div class="form-hero">
+        <div class="form-card" style="max-width: 2000px;">
+            <h2 class="form-title center-title">Dostępne miejsca parkingowe dla osiedla: {{ district.district_name }} | {{ district.post_code }} {{ district.city_name }}</h2>
+            <div class="announcement-grid">
+                {% for validity in validities %}
+                    {% if not validity.is_reserved %}
+                        <div class="announcement-tile">
+                            <div class="announcement-tile-main">
+                                <div class="announcement-tile-title">
+                                    Miejsce nr: {{ validity.parking_place.place_number }}
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <p># od {{ validity.available_from|date:'d-m-Y' }} do {{ validity.available_until|date:'d-m-Y' }}</p>
+                                        <p># w godzinach {{ validity.available_from|date:'H:i' }} do {{ validity.available_until|date:'H:i' }}</p>
+                                        <button type="submit" class="big-form-btn" name="reserve" value="{{ validity.id }}">REZERWUJĘ</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

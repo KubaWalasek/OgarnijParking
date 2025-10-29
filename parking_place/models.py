@@ -7,8 +7,6 @@ from django.core.exceptions import ValidationError
 import re
 
 
-
-
 class PostCode(models.Model):
     post_code = models.CharField(max_length=6)
     def clean(self):
@@ -76,16 +74,23 @@ class District(models.Model):
     def __str__(self):
         return f' {self.post_code} {self.city_name}, osiedle {self.district_name}'
 
-class ParkingPlaceData(models.Model):
+class ParkingPlace(models.Model):
     district = models.ForeignKey(District, on_delete=models.CASCADE)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owner')
     place_number = models.CharField(default=1)
-    available_from = models.DateTimeField(default=timezone.now)
-    available_until = models.DateTimeField(default=timezone.now)
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f'{self.district.district_name} - {self.place_number}'
+        return f'Miejsce nr: {self.place_number} - osiedle {self.district.district_name}'
+
+class ValidityPeriod(models.Model):
+    parking_place = models.ForeignKey(ParkingPlace, on_delete=models.CASCADE)
+    available_from = models.DateTimeField(default=timezone.now)
+    available_until = models.DateTimeField(default=timezone.now)
+    is_reserved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.parking_place} - {self.available_from} - {self.available_until}'
 
 
 

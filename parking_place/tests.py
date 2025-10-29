@@ -4,7 +4,7 @@ from parking_place.forms import AddUserToDistrictForm, DistrictSearchForm, PostC
 CityNameForm, DistrictForm
 from parking_place.conftest import district
 from accounts.conftest import user
-
+from parking_place.models import ParkingPlaceData
 
 
 @pytest.mark.django_db
@@ -49,6 +49,39 @@ def test_add_user_to_district_view_already_in_district(client, user, district):
     assert 'You already joined' in response.content.decode()
     assert district.signed_user.filter(id=user.id).count() == 1
 
+
+@pytest.mark.django_db
+def test_remove_user_from_district_view(client, user, district):
+    client.force_login(user)
+    district.signed_user.add(user)
+    data = {'selected_districts': [district.id]}
+    url = reverse('remove_user_from_district')
+    response = client.post(url, data)
+    assert response.status_code == 302
+    assert not district.signed_user.filter(id=user.id).exists()
+
+
+@pytest.mark.django_db
+def test_add_parking_place_view_get(client, user, district):
+    client.force_login(user)
+    url = reverse('add_parking_place', kwargs={'pk':district.id})
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_add_parking_place_view_post(client, user, district):
+    client.force_login(user)
+    url = reverse('add_parking_place', kwargs={'pk':district.id})
+    data = {
+        'place_number': '12',
+        'available_from': '2025-01-01 10:00',
+        'available_until': '2025-01-01 12:00',
+        'description': 'Test'
+    }
+    response = client.post(url, data)
+    assert response.status_code == 302
+    assert ParkingPlaceData.objects.filter(district=district, owner=user, place_number='12').exists()
 
 
 
